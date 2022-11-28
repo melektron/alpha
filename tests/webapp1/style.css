@@ -1,0 +1,19 @@
+
+.word_wrapper {
+    background-color: crimson;
+    width: 100%;
+    padding: 50px;
+    display: grid;
+}
+
+.word_english {
+    grid-column-start: 1;
+    grid-column-end: 2;
+    float: left;
+}
+
+.word_german {
+    grid-column-start: 2;
+    grid-column-end: 3;
+    float: right;
+}
