@@ -1,0 +1,38 @@
+"""
+ELEKTRON © 2022
+Written by melektron
+www.elektron.work
+28.11.22, 21:43
+
+Simple training webapp using flask and plain html + js.
+Loads translations from CSV and asks user random translation
+questions. Translation direction can be set.
+"""
+
+from flask import Flask, request
+import setloader as sl
+import json
+
+app = Flask(__name__)
+
+@app.route("/")
+def hello_world():
+    return "<p>Hello, World!</p>"
+
+@app.route("/sets")
+def get_sets():
+    return sl.get_available_sets()
+
+@app.route("/compose")
+def get_compose():
+    nr_string = request.args.get("nr")
+    alts_string = request.args.get("alts")
+    sets_string = request.args.get("sets")
+    if nr_string is None or alts_string is None or sets_string is None: 
+        return {}
+
+    nr_words = int(nr_string)
+    nr_alts = int(alts_string)
+    sets = sets_string.split(",")
+    wordlist = sl.compose_exercise(sets, nr_words, nr_alts)
+    return wordlist
