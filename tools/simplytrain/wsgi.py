@@ -8,7 +8,6 @@ Simple training webapp using flask and plain html + js.
 Loads translations from CSV and asks user random translation
 questions. Translation direction can be set.
 """
-
 from flask import Flask, request, render_template, jsonify, Response
 import setloader as sl
 
