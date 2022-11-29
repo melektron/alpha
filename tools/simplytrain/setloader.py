@@ -21,7 +21,7 @@ class WordStructure(TypedDict):
     langb: dict[str, str | list[str]]
 
 
-def get_available_sets() -> list[str]:
+def get_available_sets():
     """
     :return: a list with the names of all the available learning sets
     """
@@ -33,7 +33,7 @@ def get_available_sets() -> list[str]:
     return set_files
 
 
-def set_compose(sets: list[str]) -> dict[str, str]:
+def set_compose(sets):
     """
     generates a dictionary with words from both languages
 
@@ -57,11 +57,7 @@ def set_compose(sets: list[str]) -> dict[str, str]:
     return words
 
 
-def compose_exercise(
-        sets: list[str],
-        nr: int,
-        random_alts: int = 0
-) -> list[dict[str, dict[str, str] | dict[str, str]]]:
+def compose_exercise(sets, nr, random_alts=0):
     """
     :param sets: learning sets to use
     :param nr: number of words to use
