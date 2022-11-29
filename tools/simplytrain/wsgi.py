@@ -16,7 +16,7 @@ app = Flask(__name__)
 
 
 @app.route("/")
-def root() -> str:
+def root():
     """
     Route for the url root
 
@@ -26,7 +26,7 @@ def root() -> str:
 
 
 @app.route("/vocabs")
-def vocabs() -> str:
+def vocabs():
     """
     params:
 
@@ -46,7 +46,7 @@ def vocabs() -> str:
 
 
 @app.route("/sets")
-def get_sets() -> Response:
+def get_sets():
     """
     :return: All currently available sets, as a list
     """
@@ -54,7 +54,7 @@ def get_sets() -> Response:
 
 
 @app.route("/compose")
-def get_compose() -> Response:
+def get_compose():
     """
     params:
 
