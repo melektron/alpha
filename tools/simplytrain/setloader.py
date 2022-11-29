@@ -25,12 +25,7 @@ def get_available_sets() -> list[str]:
 
 
 def set_compose(sets: list[str]) -> dict[str, str]:
-    words: dict[str, str] = {
-        "hello": "Hallo",
-        "human": "mensch",
-        "yes": "ja",
-        "no": "nein"
-    }
+    words: dict[str, str] = {}
     available_sets = get_available_sets()
     valid_sets = list(set(sets) & set(available_sets))
 
