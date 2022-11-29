@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block body %}
+    <form id="setsBox">
+
+    </form>
+    <div id="startBox">
+
+    </div>
+    <script>
+        fetch("/sets")
+            .then((response) => {
+                return response.json()
+            })
+            .then((data) => {
+                data.sort();
+                console.log(data);
+                let out = ``;
+                for (const i in data) {
+                    console.log(i, data[i]);
+                    out += `
+                    <div class="checkerBox">
+                        <input type="checkbox" id="${i}" class="setButton">
+                        <label for="${i}" class="checkLabel">${data[i]}</label>
+                    </div>
+                    `
+                }
+                console.log("done")
+                document.getElementById("setsBox").innerHTML = out;
+            })
+    </script>
+{% endblock %}

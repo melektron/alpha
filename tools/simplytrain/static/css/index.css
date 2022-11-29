@@ -1,0 +1,82 @@
+html,body {
+    width: 100%;
+
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    background: #111;
+
+    display: flex;
+    flex-direction: row;
+
+    font-family: serif, serif;
+}
+
+
+.container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+
+#setsBox {
+    flex: 1;
+    margin: 20px 0 20px 20px;
+    padding: 5vh 5vw;
+
+    border-radius: 25px;
+
+    background: #222;
+
+    align-items: center;
+}
+
+#startBox {
+    flex: 1;
+    margin: 20px 20px 0 20px;
+    padding: 5vh 5vw;
+
+    border-radius: 25px;
+
+    background: #222;
+}
+
+.setButton {
+    font-size: 3em;
+    text-align: center;
+    color: white;
+    padding: 10px;
+
+    margin: 20px;
+    background: rgb(255, 255, 255, .3);
+    border-radius: 20px;
+    border-width: 0;
+}
+
+/*.setButton:hover {*/
+/*    transition-duration: .2s;*/
+/*    background: rgba(255, 255, 255, 0.75);*/
+/*    color: black;*/
+/*}*/
+
+/*.setButton:checked {*/
+/*    background: green;*/
+/*}*/
+
+.checkLabel {
+    color: white;
+    font-size: 3em;
+}
+
+.checkerBox {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+
+    justify-content: flex-start;
+}
