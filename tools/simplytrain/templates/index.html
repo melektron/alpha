@@ -17,7 +17,14 @@
             <label for="swap" class="swapthingy">Swap</label>
         </div>
 
-        <button id="startButton">Start</button>
+        <form>
+            <label style="color: white">
+                How many vocabs?
+                <input type="text" id="howMany" value="10">
+            </label>
+        </form>
+
+        <button id="startButton" onclick="startStuff()">Start</button>
     </div>
     <script>
         fetch("/sets")

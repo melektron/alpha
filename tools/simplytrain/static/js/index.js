@@ -12,7 +12,7 @@ function getSetSelection() {
     let selected_sets = []
     let checks = document.getElementById("setsBox").children;
     
-    for (var i = 0; i < checks.length; i++) {
+    for (let i = 0; i < checks.length; i++) {
         let checkbox = checks[i].getElementsByTagName("input")[0];
         let checklabel = checks[i].getElementsByTagName("label")[0];
         if (checkbox.checked) {
@@ -24,12 +24,20 @@ function getSetSelection() {
 }
 
 
-function getWords() {
-    fetch("/compose?nr=500&alts=0&sets=BS_100-101,BS_102-105")
-        .then((response) => {
-            return response.json()
-        })
-        .then({
+function startStuff() {
+    let n = document.getElementById("howMany").value;
+    let sets = getSetSelection();
+    sets = sets.toString();
 
-        })
+    if (!sets) {
+        alert("please select at least 1 set!");
+        return;
+    }
+
+    if (!n) {
+        alert("please enter a value of min. 1!");
+        return;
+    }
+
+    location.href = `/vocabs?nr=${n}&alts=0&sets=${sets}`;
 }

@@ -22,6 +22,16 @@ def root():
     return render_template("index.html")
 
 
+@app.route("/vocabs")
+def vocabs():
+    nr_string = request.args.get("nr")
+    alts_string = request.args.get("alts")
+    sets_string = request.args.get("sets")
+
+    return render_template("vocabulary.html", n=nr_string, a=alts_string, s=sets_string)
+
+
+
 @app.route("/sets")
 def get_sets():
     return jsonify(sl.get_available_sets())
