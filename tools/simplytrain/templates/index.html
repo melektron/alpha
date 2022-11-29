@@ -3,7 +3,6 @@
 {% block head %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}
 
 {% block body %}
@@ -11,7 +10,14 @@
 
     </form>
     <div id="startBox">
+        <label style="color: white; font-size: 2em; font-weight: bold">Options</label>
 
+        <div class="swapthingyBox">
+            <input type="checkbox" id="swap">
+            <label for="swap" class="swapthingy">Swap</label>
+        </div>
+
+        <button id="startButton">Start</button>
     </div>
     <script>
         fetch("/sets")
