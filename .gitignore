@@ -3,3 +3,6 @@
 _pycache__
 *.pyc
 *.o
+
+.idea/
+venv/

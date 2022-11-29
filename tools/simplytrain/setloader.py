@@ -13,13 +13,16 @@ import random as r
 
 CONTENT_DIR = "./content/"
 
-def get_available_sets() -> str:
+
+def get_available_sets() -> list[str]:
     set_files: list[str] = []
     for file in os.listdir(CONTENT_DIR):
         if not os.path.isfile(os.path.join(CONTENT_DIR, file)): continue
         if not file.endswith(".csv"): continue
         set_files.append(file.removesuffix(".csv"))
+
     return set_files
+
 
 def set_compose(sets: list[str]) -> dict[str, str]:
     words: dict[str, str] = {

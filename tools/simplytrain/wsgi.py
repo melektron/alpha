@@ -9,19 +9,33 @@ Loads translations from CSV and asks user random translation
 questions. Translation direction can be set.
 """
 
-from flask import Flask, request
+from flask import Flask, request, render_template, jsonify
 import setloader as sl
 import json
 
+
 app = Flask(__name__)
 
+
 @app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
+def root():
+    return render_template("index.html")
+
+
+@app.route("/vocabs")
+def vocabs():
+    nr_string = request.args.get("nr")
+    alts_string = request.args.get("alts")
+    sets_string = request.args.get("sets")
+
+    return render_template("vocabulary.html", n=nr_string, a=alts_string, s=sets_string)
+
+
 
 @app.route("/sets")
 def get_sets():
-    return sl.get_available_sets()
+    return jsonify(sl.get_available_sets())
+
 
 @app.route("/compose")
 def get_compose():
@@ -35,4 +49,4 @@ def get_compose():
     nr_alts = int(alts_string)
     sets = sets_string.split(",")
     wordlist = sl.compose_exercise(sets, nr_words, nr_alts)
-    return wordlist
+    return jsonify(wordlist)
