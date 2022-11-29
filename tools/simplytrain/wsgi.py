@@ -26,9 +26,10 @@ def root():
 def vocabs():
     nr_string = request.args.get("nr")
     alts_string = request.args.get("alts")
+    swap_string = request.args.get("swap")
     sets_string = request.args.get("sets")
 
-    return render_template("vocabulary.html", n=nr_string, a=alts_string, s=sets_string)
+    return render_template("vocabulary.html", n=nr_string, a=alts_string, swapflag = swap_string, s=sets_string)
 
 
 

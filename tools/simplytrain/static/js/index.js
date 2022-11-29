@@ -26,6 +26,7 @@ function getSetSelection() {
 
 function startStuff() {
     let n = document.getElementById("howMany").value;
+    let swap = document.getElementById("swap").checked ? true : false
     let sets = getSetSelection();
     sets = sets.toString();
 
@@ -39,5 +40,5 @@ function startStuff() {
         return;
     }
 
-    location.href = `/vocabs?nr=${n}&alts=0&sets=${sets}`;
+    location.href = `/vocabs?nr=${n}&alts=0&swap=${swap}&sets=${sets}`;
 }
