@@ -15,7 +15,7 @@ www.elektron.work
 
 code for loading learning sets from csv files
 """
-from typing import TypedDict
+from typing import TypedDict, Union
 
 
 CONTENT_DIR: str

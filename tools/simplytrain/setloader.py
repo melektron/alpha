@@ -7,7 +7,7 @@ www.elektron.work
 code for loading learning sets from csv files
 """
 from contextlib import suppress
-from typing import TypedDict
+from typing import TypedDict, Union
 import random as r
 import csv
 import os
@@ -17,8 +17,8 @@ CONTENT_DIR = "./content/"
 
 
 class WordStructure(TypedDict):
-    langa: dict[str, str | list[str]]
-    langb: dict[str, str | list[str]]
+    langa: dict[str, Union[str, list[str]]]
+    langb: dict[str, Union[str, list[str]]]
 
 
 def get_available_sets():
@@ -67,7 +67,7 @@ def compose_exercise(sets, nr, random_alts=0):
     all_words = set_compose(sets)
     words: list[str] = r.sample(all_words.keys(), nr)
 
-    exercise: list[dict[str, dict[str, str] | dict[str, str]]] = []
+    exercise: list[dict[str, Union[dict[str, str], dict[str, str]]]] = []
     for word in words:
         word_structure: WordStructure = {
             "langa": {
