@@ -47,7 +47,7 @@ def set_compose(sets):
     # parse all sets' files and add the words to the output dictionary
     for current_set in valid_sets:
         with open(os.path.join(CONTENT_DIR, current_set + ".csv")) as csvfile:
-            spam_reader = csv.reader(csvfile, delimiter=";", quotechar="|")
+            spam_reader = csv.reader(csvfile, delimiter=";", quotechar="\"")
             for entry in spam_reader:
                 with suppress(IndexError):  # ignore invalid csv rows
                     lang_a = entry[0]
