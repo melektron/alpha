@@ -1,14 +1,26 @@
-import './assets/main.css'
+/*
+ELEKTRON © 2023 - now
+Written by melektron
+www.elektron.work
+15.12.23, 09:52
 
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
+Main application entry point
+*/
 
-import App from './App.vue'
-import router from './router'
+import './assets/main.css';
 
-const app = createApp(App)
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
+import PrimeVue from 'primevue/config';
 
-app.use(createPinia())
-app.use(router)
+import App from './App.vue';
+import router from './router';
 
-app.mount('#app')
+
+const app = createApp(App);
+
+app.use(createPinia());
+app.use(PrimeVue);
+app.use(router);
+
+app.mount('#app');
