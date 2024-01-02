@@ -10,86 +10,96 @@ Main UI entry component
 <script setup lang="ts">
 
 import { RouterLink, RouterView } from 'vue-router'
+import { ref } from 'vue';
+import type { MenuItem } from 'primevue/menuitem';
+
+const menuitems = ref<MenuItem[]>([
+    {
+        label: 'Home',
+        icon: 'pi pi-home', 
+        url: '/'
+    },
+    {
+        label: 'About',
+        icon: 'pi pi-info-circle', 
+        url: '/about'
+    },
+    {
+        label: 'WS Test',
+        icon: 'pi pi-sort-alt', 
+        url: '/wstest'
+    }
+])
 
 </script>
 
 
 <template>
-    <header>
-        <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-        <div class="wrapper">
-            <nav>
-                <RouterLink to="/">Home</RouterLink>
-                <RouterLink to="/about">About</RouterLink>
-            </nav>
+    <div class="main-layout">
+        <div class="logo-wrapper">
+            <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
         </div>
-    </header>
 
-    <RouterView />
+        <div class="menu-wrapper">
+            <Menu :model="menuitems">
+                <template #item="{ item, props }">
+                    <RouterLink v-if="item.url" v-slot="{ href, navigate }" :to="item.url" custom>
+                        <a v-ripple :href="href" v-bind="props.action" @click="navigate">
+                            <span :class="item.icon + ' p-menuitem-icon'" />
+                            <span class="ml-2">{{ item.label }}</span>
+                        </a>
+                    </RouterLink>
+                    <a v-else v-ripple :href="item.url" :target="item.target" v-bind="props.action">
+                        <span>(ERROR)</span>
+                        <span :class="item.icon + ' p-menuitem-icon'" />
+                        <span class="ml-2">{{ item.label }}</span>
+                    </a>
+                </template>
+            </Menu>
+        </div>
+
+        <div class="main-wrapper">
+
+            <RouterView />
+
+        </div>
+    </div>
 </template>
 
 
 <style scoped>
-header {
-    line-height: 1.5;
+.main-layout {
+    display: grid;
+    grid-template-areas:
+        "logo main"
+        "menu main";
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-columns: auto 1fr;
+    gap: 20px;
+    padding: 20px;
+    height: 100vh;
     max-height: 100vh;
+    width: 100vw;
+    max-width: 100vw;
 }
+
+.logo-wrapper {
+    grid-area: logo;
+}
+
+.main-layout>.menu-wrapper {
+    grid-area: menu;
+}
+
+.main-layout>.main-wrapper {
+    height: minmax(0, auto);
+    grid-area: main;
+    overflow: none;
+}
+
 
 .logo {
     display: block;
     margin: 0 auto 2rem;
-}
-
-nav {
-    width: 100%;
-    font-size: 12px;
-    text-align: center;
-    margin-top: 2rem;
-}
-
-nav a.router-link-exact-active {
-    color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-    background-color: transparent;
-}
-
-nav a {
-    display: inline-block;
-    padding: 0 1rem;
-    border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-    border: 0;
-}
-
-@media (min-width: 1024px) {
-    header {
-        display: flex;
-        place-items: center;
-        padding-right: calc(var(--section-gap) / 2);
-    }
-
-    .logo {
-        margin: 0 2rem 0 0;
-    }
-
-    header .wrapper {
-        display: flex;
-        place-items: flex-start;
-        flex-wrap: wrap;
-    }
-
-    nav {
-        text-align: left;
-        margin-left: -1rem;
-        font-size: 1rem;
-
-        padding: 1rem 0;
-        margin-top: 1rem;
-    }
 }
 </style>
