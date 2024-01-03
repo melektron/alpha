@@ -83,7 +83,7 @@ const menuitems = ref<MenuItem[]>([
     max-width: 100vw;
 }
 
-.logo-wrapper {
+.main-layout>.logo-wrapper {
     grid-area: logo;
 }
 
@@ -101,5 +101,24 @@ const menuitems = ref<MenuItem[]>([
 .logo {
     display: block;
     margin: 0 auto 2rem;
+}
+
+@media screen and (max-width: 1000px) {
+    
+    .main-layout {
+        display: grid;
+        grid-template-areas:
+            "main"
+            "main";
+        grid-template-columns: 1fr;
+    }
+    
+    .main-layout>.logo-wrapper {
+        display: none;
+    }
+
+    .main-layout>.menu-wrapper {
+        display: none;
+    }
 }
 </style>
