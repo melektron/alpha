@@ -27,6 +27,10 @@ import Textarea from 'primevue/textarea';
 import Card from 'primevue/card';
 import Toolbar from 'primevue/toolbar';
 import InputSwitch from 'primevue/inputswitch';
+import Splitter from 'primevue/splitter';
+import SplitterPanel from 'primevue/splitterpanel';
+import InputText from 'primevue/inputtext';
+import InputGroup from 'primevue/inputgroup';
 
 const app = createApp(App);
 
@@ -44,6 +48,10 @@ app.component('Textarea', Textarea);
 app.component('Card', Card);
 app.component('Toolbar', Toolbar);
 app.component('InputSwitch', InputSwitch);
+app.component('InputText', InputText);
+app.component('InputGroup', InputGroup);
+app.component('Splitter', Splitter);
+app.component('SplitterPanel', SplitterPanel);
 
 
 app.mount('#app');

@@ -9,15 +9,19 @@ Home page with overview
 
 <script setup lang="ts">
 
-import { useTestSocket, SocketState} from '@/stores/test_socket';
+import { useTestSocket, SocketState } from '@/stores/test_socket';
 import type { CommEventType } from '@/stores/test_socket';
+import type InputText from 'primevue/inputtext';
 import TerminalService from 'primevue/terminalservice';
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 const socket = useTestSocket();
+
 const communication_log_container = ref<HTMLDivElement[] | null>(null);
+const send_buffer_input_element = ref<InstanceType<typeof InputText> | null>(null);
 
 const auto_scroll = ref(true);
+const send_buffer = ref("");
 
 function onCommand(command: string) {
     console.log(command);
@@ -34,9 +38,9 @@ function onCommand(command: string) {
             socket.openConnection();
             break;
         case "a":
-            socket.communication_log.push({data: "a", type:"ctrl"});
+            socket.communication_log.push({ data: "a", type: "ctrl" });
             break;
-    
+
         default:
             break;
     }
@@ -55,6 +59,16 @@ function logPrefixForType(t: CommEventType): string {
     }
 }
 
+function focusSendBufferInputElement() {
+    // @ts-ignore   (Not officially supported to use $el)
+    send_buffer_input_element.value?.$el.focus();
+}
+
+function sendCurrentBuffer() {
+    socket.sendMessage(send_buffer.value);
+    send_buffer.value = "";
+}
+
 onMounted(() => {
     TerminalService.on("command", onCommand);
 });
@@ -67,7 +81,7 @@ onBeforeUnmount(() => {
 watch(socket.communication_log, async () => {
     if (!auto_scroll.value)
         return;
-    
+
     const element = communication_log_container.value?.pop()?.parentElement
     if (!element)
         return;
@@ -86,23 +100,17 @@ watch(socket.communication_log, async () => {
         <h1>WebSocket Test </h1>
         <Toolbar>
             <template #start>
-                <span class="note-disconnected" v-if="socket.socket_state === SocketState.DISCONNECTED"> Disconnected </span>
+                <span class="note-disconnected" v-if="socket.socket_state === SocketState.DISCONNECTED"> Disconnected
+                </span>
                 <span class="note-connecting" v-if="socket.socket_state === SocketState.CONNECTING"> Connecting ... </span>
                 <span class="note-connected" v-if="socket.socket_state === SocketState.CONNECTED"> Connected </span>
             </template>
             <template #end>
-                <Button 
-                    v-if="socket.socket_state === SocketState.DISCONNECTED" 
-                    @click="socket.openConnection()" 
-                    severity="success"
-                >
+                <Button v-if="socket.socket_state === SocketState.DISCONNECTED" @click="socket.openConnection()"
+                    severity="success">
                     Connect
                 </Button>
-                <Button 
-                    v-else
-                    @click="socket.closeConnection()" 
-                    severity="danger"
-                >
+                <Button v-else @click="socket.closeConnection()" severity="danger">
                     Disconnect
                 </Button>
 
@@ -110,49 +118,59 @@ watch(socket.communication_log, async () => {
                 <InputSwitch v-model="auto_scroll" />
             </template>
         </Toolbar>
-        <Terminal 
-            welcome-message="Welcome to Socket Test"
-            prompt=">&nbsp"
-            :pt="{
-                root: 'term-root',
-                welcomeMessage: 'term-welcome-msg',
-                prompt: 'term-prompt',
-                command: 'term-command',        // previous commands
-                commandText: 'term-command',    // new command
-                response: 'term-response'
-            }"
-        />
+
+        <Splitter>
+            <SplitterPanel :size="30" :min-size="10">
+                <Terminal welcome-message="Welcome to Socket Test" prompt=">&nbsp" :pt="{
+                    root: 'term-root',
+                    welcomeMessage: 'term-welcome-msg',
+                    prompt: 'term-prompt',
+                    command: 'term-command',        // previous commands
+                    commandText: 'term-command',    // new command
+                    response: 'term-response'
+                }" />
+            </SplitterPanel>
+            <SplitterPanel :size="70" class="button-panel">
+                <form @submit.prevent="sendCurrentBuffer">
+                    <InputGroup>
+                        <InputText v-model="send_buffer" ref="send_buffer_input_element" placeholder="Outgoing Data ..." />
+                        <Button type="submit">Send</Button>
+                    </InputGroup>
+                </form>
+            </SplitterPanel>
+        </Splitter>
 
         <Panel header="Communication Log" :pt="{
             content: 'log-container',
             toggleableContent: 'log-toggleable-content',    // the outer element wrapping the content for sizing config
             root: 'log-root'
         }">
-            <div 
-                v-for="entry in socket.communication_log" 
-                class="log-entry-wrapper"
-                ref="communication_log_container"
-            >
+            <div v-for="entry in socket.communication_log" class="log-entry-wrapper" ref="communication_log_container">
                 <span class="log-entry-prefix">{{ logPrefixForType(entry.type) }}&nbsp</span>
                 <span :class="{
                     'log-entry-content-ctrl': entry.type == 'ctrl',
                     'log-entry-content-error': entry.type == 'error',
                     'log-entry-content-incoming': entry.type == 'incoming',
                     'log-entry-content-outgoing': entry.type == 'outgoing'
+                }" @dblclick="() => {
+                    if (entry.type === 'incoming' || entry.type === 'outgoing') {
+                        send_buffer = entry.data;
+                        focusSendBufferInputElement();
+                    }
                 }">
                     {{ entry.data }}
                 </span>
+                <!-- The following element is shown to indicate the entry can be re-sent -->
+                <span v-if="entry.type === 'outgoing' || entry.type === 'incoming'" class="log-entry-redo">&#8634</span>
             </div>
         </Panel>
 
-        
+
     </main>
 </template>
 
 
 <style scoped>
-
-
 main {
     height: 100%;
     width: 100%;
@@ -176,11 +194,13 @@ main {
 }
 
 :deep(.term-root) {
-    border-radius: 6px;
-    height: 300px;
+    border-radius: 6px; /* Needed to not cut splitter corners */
+    border: none;
+    height: 200px;
 }
 
-:deep(.term-welcome-msg), :deep(.term-prompt) {
+:deep(.term-welcome-msg),
+:deep(.term-prompt) {
     color: gray;
 }
 
@@ -190,6 +210,10 @@ main {
 
 :deep(.term-response) {
     color: var(--green-300);
+}
+
+.button-panel {
+    padding: var(--content-padding);
 }
 
 :deep(.log-root) {
@@ -215,9 +239,11 @@ main {
     0% {
         background-color: transparent;
     }
+
     50% {
         background-color: var(--primary-800);
     }
+
     100% {
         background-color: transparent;
     }
@@ -230,17 +256,37 @@ main {
 .log-entry-prefix {
     color: var(--bluegray-500);
 }
+
 .log-entry-content-ctrl {
     color: var(--bluegray-500);
 }
+
 .log-entry-content-error {
     color: var(--red-300);
 }
+
 .log-entry-content-incoming {
     color: var(--green-300);
 }
+
 .log-entry-content-outgoing {
     color: var(--blue-300);
 }
 
+.log-entry-content-outgoing:hover, .log-entry-content-incoming:hover {
+    background-color: var(--primary-800);
+    border-radius: 4px;
+    cursor: copy;
+}
+
+.log-entry-content-outgoing:hover + .log-entry-redo, .log-entry-content-incoming:hover + .log-entry-redo {
+    display: inline-block;  /* show .log-entry-redo only when hovering an incoming/outgoing entry */
+}
+
+.log-entry-redo {
+    display: none;
+    padding-left: 5px;
+    font-weight: bold;
+    transform: scale(1.5) translateY(-10%);
+}
 </style>
