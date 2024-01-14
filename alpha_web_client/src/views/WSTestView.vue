@@ -21,6 +21,7 @@ const communication_log_container = ref<HTMLDivElement[] | null>(null);
 const send_buffer_input_element = ref<InstanceType<typeof InputText> | null>(null);
 
 const auto_scroll = ref(true);
+const keep_buffer = ref(false);
 const send_buffer = ref("");
 
 function onCommand(command: string) {
@@ -66,7 +67,8 @@ function focusSendBufferInputElement() {
 
 function sendCurrentBuffer() {
     socket.sendMessage(send_buffer.value);
-    send_buffer.value = "";
+    if (!keep_buffer.value)
+        send_buffer.value = "";
 }
 
 onMounted(() => {
@@ -114,6 +116,8 @@ watch(socket.communication_log, async () => {
                     Disconnect
                 </Button>
 
+                <span style="padding-left: 20px; padding-right: 10px;">Keep Buffer</span>
+                <InputSwitch v-model="keep_buffer" />
                 <span style="padding-left: 20px; padding-right: 10px;">Autoscroll</span>
                 <InputSwitch v-model="auto_scroll" />
             </template>
