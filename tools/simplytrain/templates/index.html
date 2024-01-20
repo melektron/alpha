@@ -23,7 +23,7 @@
 
         <form>
             <label style="color: white">
-                How many vocabs?
+                How many vocabs? (<span id="nr_avail_words">0</span> available)
                 <input type="text" id="howMany" value="10">
             </label>
         </form>
@@ -43,7 +43,7 @@
                     console.log(i, data[i]);
                     out += `
                     <div class="checkerBox">
-                        <input type="checkbox" id="${i}" class="setButton">
+                        <input type="checkbox" id="${i}" class="setButton" onclick="onSelectionChanged()">
                         <label for="${i}" class="checkLabel">${data[i]}</label>
                     </div>
                     `

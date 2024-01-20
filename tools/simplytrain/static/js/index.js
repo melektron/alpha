@@ -23,6 +23,18 @@ function getSetSelection() {
     return selected_sets
 }
 
+function onSelectionChanged() {
+    // get selection and update count of available words
+    let sets = getSetSelection();
+    fetch(`/nrwords?sets=${sets}`)
+    .then((response) => {
+        return response.json()
+    })
+    .then((data) => {
+        console.log("Got available word count: ", data);
+        document.getElementById("nr_avail_words").innerText = "" + data.count;
+    })
+}
 
 function startStuff() {
     let n = document.getElementById("howMany").value;

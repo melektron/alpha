@@ -13,7 +13,7 @@ import csv
 import os
 
 
-CONTENT_DIR = "./content/"
+CONTENT_DIR = "./content/240123_4AHEL_VOC_TEST_1"
 
 
 class WordStructure(TypedDict):
@@ -56,6 +56,15 @@ def set_compose(sets):
 
     return words
 
+def get_nr_available_words(sets: list[str]) -> int:
+    """
+    Returns the number of words contained in a certain set
+
+    :param sets: sets to count words in
+    :return: number of words in the selected sets
+    """
+    words = set_compose(sets)
+    return len(words)
 
 def compose_exercise(sets, nr, random_alts=0):
     """

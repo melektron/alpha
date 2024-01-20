@@ -53,6 +53,26 @@ def get_sets():
     return jsonify(sl.get_available_sets())
 
 
+@app.route("/nrwords")
+def nrwords():
+    """
+    params:
+
+    - **sets**: list[str] = list of sets to count words in (usually the ones selected)
+
+    :return: nubmer of words
+    """
+    sets_string: str = request.args.get("sets")
+    if sets_string is None: 
+        return jsonify({})
+
+    sets = sets_string.split(",")
+
+    return jsonify({
+        "count": sl.get_nr_available_words(sets)
+    })
+
+
 @app.route("/compose")
 def get_compose():
     """

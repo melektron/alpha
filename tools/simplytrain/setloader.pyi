@@ -33,6 +33,8 @@ def get_available_sets() -> list[str]:
 def set_compose(sets: list[str]) -> dict[str, str]:
     ...
 
+def get_nr_available_words(sets: list[str]) -> int:
+    ...
 
 def compose_exercise(
         sets: list[str],
