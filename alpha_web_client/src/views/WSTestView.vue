@@ -134,13 +134,16 @@ watch(socket.communication_log, async () => {
                     response: 'term-response'
                 }" />
             </SplitterPanel>
-            <SplitterPanel :size="70" class="button-panel">
-                <form @submit.prevent="sendCurrentBuffer">
-                    <InputGroup>
-                        <InputText v-model="send_buffer" ref="send_buffer_input_element" placeholder="Outgoing Data ..." />
-                        <Button type="submit">Send</Button>
-                    </InputGroup>
-                </form>
+            <SplitterPanel :size="70" class="controls-panel">
+                <div class="controls-container">
+                    <form @submit.prevent="sendCurrentBuffer" class="send-form">
+                        <InputGroup>
+                            <InputText v-model="send_buffer" ref="send_buffer_input_element" placeholder="Outgoing Data ..." />
+                            <Button type="submit">Send</Button>
+                        </InputGroup>
+                    </form>
+                    <Button @click="socket.clearLog()">Clear Log</Button>
+                </div>
             </SplitterPanel>
         </Splitter>
 
@@ -200,7 +203,7 @@ main {
 :deep(.term-root) {
     border-radius: 6px; /* Needed to not cut splitter corners */
     border: none;
-    height: 200px;
+    height: 300px;
 }
 
 :deep(.term-welcome-msg),
@@ -216,8 +219,21 @@ main {
     color: var(--green-300);
 }
 
-.button-panel {
+.controls-panel {
     padding: var(--content-padding);
+}
+
+.controls-container {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: var(--content-padding);
+}
+
+.controls-panel .send-form {
+    width: 100%;
 }
 
 :deep(.log-root) {

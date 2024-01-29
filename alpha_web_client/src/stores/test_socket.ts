@@ -9,6 +9,7 @@ Manages the integrated test websocket client
 
 import { ref, computed } from "vue"
 import { defineStore } from "pinia"
+import { useLocalStorage } from "@vueuse/core";
 
 
 let socket: WebSocket | null = null;
@@ -31,7 +32,7 @@ export const useTestSocket = defineStore("test_socket", () => {
     const socket_state = ref(SocketState.DISCONNECTED);
     const incoming_count = ref(0);
     const outgoing_count = ref(0);
-    const communication_log = ref<CommEvent[]>([]);
+    const communication_log = useLocalStorage<CommEvent[]>("comm_log", []);//ref<CommEvent[]>([]);
 
     function onOpen(this: WebSocket, e: Event): void {
         socket_state.value = SocketState.CONNECTED;
@@ -54,12 +55,12 @@ export const useTestSocket = defineStore("test_socket", () => {
             type: "error"
         });
     }
-    function onClose(this: WebSocket, e: Event) {
+    function onClose(this: WebSocket, e: CloseEvent) {
         socket = null;
         socket_state.value = SocketState.DISCONNECTED;
 
         communication_log.value.push({
-            data: "Socket Disconnected",
+            data: `Socket Disconnected with code ${e.code} (${e.reason})`,
             type: "ctrl"
         });
     }
@@ -99,6 +100,10 @@ export const useTestSocket = defineStore("test_socket", () => {
         socket.close();
     }
 
+    function clearLog() {
+        communication_log.value = [];
+    }
+
     return {
         socket_state,
         incoming_count,
@@ -106,6 +111,7 @@ export const useTestSocket = defineStore("test_socket", () => {
         communication_log,
         openConnection,
         closeConnection,
-        sendMessage
+        sendMessage,
+        clearLog
     };
 })
