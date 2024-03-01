@@ -31,12 +31,15 @@ import Splitter from 'primevue/splitter';
 import SplitterPanel from 'primevue/splitterpanel';
 import InputText from 'primevue/inputtext';
 import InputGroup from 'primevue/inputgroup';
+import ConfirmDialog from 'primevue/confirmdialog';
+import ConfirmationService from 'primevue/confirmationservice';
 
 const app = createApp(App);
 
 app.use(createPinia());
 app.use(PrimeVue);
 app.use(router);
+app.use(ConfirmationService);
 
 app.component('Button', Button);
 app.component('Menu', Menu)
@@ -52,6 +55,7 @@ app.component('InputText', InputText);
 app.component('InputGroup', InputGroup);
 app.component('Splitter', Splitter);
 app.component('SplitterPanel', SplitterPanel);
+app.component('ConfirmDialog', ConfirmDialog);
 
 
 app.mount('#app');

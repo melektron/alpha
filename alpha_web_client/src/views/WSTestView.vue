@@ -9,11 +9,13 @@ Home page with overview
 
 <script setup lang="ts">
 
+
+import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useTestSocket, SocketState } from '@/stores/test_socket';
 import type { CommEventType } from '@/stores/test_socket';
 import type InputText from 'primevue/inputtext';
 import TerminalService from 'primevue/terminalservice';
-import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { useConfirm } from 'primevue/useconfirm';
 
 const socket = useTestSocket();
 
@@ -23,6 +25,8 @@ const send_buffer_input_element = ref<InstanceType<typeof InputText> | null>(nul
 const auto_scroll = ref(true);
 const keep_buffer = ref(false);
 const send_buffer = ref("");
+
+const confirm = useConfirm();
 
 function onCommand(command: string) {
     console.log(command);
@@ -69,6 +73,22 @@ function sendCurrentBuffer() {
     socket.sendMessage(send_buffer.value);
     if (!keep_buffer.value)
         send_buffer.value = "";
+}
+
+function confirmClearLog() {
+    confirm.require({
+        message: 'Are you sure you want to clear the log?',
+        header: 'Clear communication log?',
+        icon: 'pi pi-exclamation-triangle',
+        rejectClass: 'p-button-secondary p-button-outlined',
+        acceptClass: 'p-button-danger',
+        rejectLabel: 'Cancel',
+        acceptLabel: 'Clear Log',
+        accept: () => {
+            socket.clearLog();
+        },
+        reject: () => {}
+    });
 }
 
 onMounted(() => {
@@ -142,10 +162,13 @@ watch(socket.communication_log, async () => {
                             <Button type="submit">Send</Button>
                         </InputGroup>
                     </form>
-                    <Button @click="socket.clearLog()">Clear Log</Button>
+                    <Button @click="confirmClearLog()" severity="danger" outlined>Clear Log</Button>
                 </div>
             </SplitterPanel>
         </Splitter>
+        
+        <!-- Confirmation dialog for things like clear log -->
+        <ConfirmDialog />
 
         <Panel header="Communication Log" :pt="{
             content: 'log-container',
