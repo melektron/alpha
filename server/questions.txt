@@ -1,0 +1,19 @@
+What is the capital of France?;Paris
+What is the largest planet in the Solar System?;Jupiter
+Who wrote the play 'Hamlet'?;William Shakespeare
+What is the chemical symbol for water?;H2O
+What is the tallest mammal?;Giraffe
+What is the chemical symbol for gold?;Au
+Who painted the Mona Lisa?;Leonardo da Vinci
+What is the currency of Japan?;Yen
+What is the capital of Australia?;Canberra
+How many continents are there?;7
+What is the largest ocean on Earth?;Pacific Ocean
+What is the tallest mountain in the world?;Mount Everest
+What is the chemical symbol for oxygen?;O
+What is the largest organ in the human body?;Skin
+What is the chemical symbol for carbon?;C
+What is the hardest natural substance on Earth?;Diamond
+What is the main ingredient in guacamole?;Avocado
+What is the largest desert in the world?;Antarctica
+What is the smallest prime number?;2
