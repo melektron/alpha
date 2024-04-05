@@ -14,6 +14,7 @@ def main():
     print(response)  # Acknowledge name received
 
     while True:
+        ranking = client.recv(1024).decode()
         question = client.recv(1024).decode()
 
         print(question)
