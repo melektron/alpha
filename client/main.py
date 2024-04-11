@@ -1,5 +1,6 @@
 import socket
-import time 
+import time
+
 
 def main():
     host = '127.0.0.1'
@@ -18,21 +19,22 @@ def main():
         question = client.recv(1024).decode()
 
         print(question)
-        start_time=time.time()
+        start_time = time.time()
 
         if question.startswith("Your final score"):
             break
 
         answer = input("Your answer: ")
-        stop_time=time.time()
-        used_time=round(stop_time-start_time,2)
-        message=answer+";"+used_time
+        stop_time = time.time()
+        used_time = round(stop_time - start_time, 2)
+        message = answer + ";" + used_time
         client.sendall(message.encode())
 
         response = client.recv(1024).decode()
         print(response)
 
     client.close()
+
 
 if __name__ == "__main__":
     main()

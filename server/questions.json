@@ -1,0 +1,44 @@
+{
+  "text": [
+    {
+      "question": "What is the capital of France?",
+      "valid": ["Paris"],
+      "match_case": false
+    },
+    {
+      "question": "What is the largest planet in the Solar System?",
+      "valid": ["Jupiter"],
+      "match_case": false
+    },
+    {
+      "question": "Who wrote the play \"Hamlet\"?",
+      "valid": ["William Shakespeare", "Shakespeare"],
+      "match_case": false
+    },
+    {
+      "question": "What is the chemical Symbol for water?",
+      "valid": ["H2O"],
+      "match_case": true
+    },
+    {
+      "question": "What is the tallest mammal?",
+      "valid": ["Giraffe"],
+      "match_case": false
+    },
+    {
+      "question": "What is the chemical symbol for gold?",
+      "valid": ["Au"],
+      "match_case": true
+    },
+    {
+      "question": "Who painted the Mona Lisa?",
+      "valid": ["Leonardo da Vinci", "Da Vinci"],
+      "match_case": false
+    },
+    {
+      "question": "What is the currency of Japan?",
+      "valid": ["Yen"],
+      "match_case": false
+    }
+  ]
+}
