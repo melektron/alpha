@@ -77,7 +77,7 @@ class Server:
         self._socket.listen()
 
         # create questions master
-        self._qmaster = QuestionsMaster()
+        self._qmaster = QuestionsMaster
         self._qmaster.load_from_file("./questions.json")
 
         self._loop = loop
@@ -132,25 +132,31 @@ class Server:
         ic("created task")
 
         try:
-            # await aioconsole.ainput('Press enter to start! ')
-            await asyncio.sleep(100000)
+            while True:
+                await aioconsole.ainput('Press enter to start! ')
 
-            # stop accepting clients
-            self._accepting = False
+                # stop accepting clients
+                self._accepting = False
 
-            # start questioning
-            questions = self._qmaster.get_random_question(
-                n_questions=10,
-            )
+                # start questioning
+                questions = self._qmaster.get_random_question(
+                    n_questions=10,
+                )
 
-            for question in questions:
-                ...
+                for question in questions:
+                    await CLIENTS.ask_question(question)
+                    await CLIENTS.question_done()
+                    await CLIENTS.send_statistics()
+
+        except Exception as e:
+            ic(e)
 
         finally:
             for client in CLIENTS:
                 client.close()
 
             await f
+            raise
 
 
 if __name__ == "__main__":
@@ -158,4 +164,5 @@ if __name__ == "__main__":
     asyncio.set_event_loop(loop)
 
     server = Server(HOST, PORT, loop)
-    asyncio.run(server.run())
+    loop.create_task(server.run())
+    loop.run_forever()

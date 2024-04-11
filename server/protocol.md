@@ -2,7 +2,7 @@
 
 ```json
 {
-  "type": "login|question|answer|request|error",
+  "type": "login|question|answer|request|error|stats",
   (question) "question_type": <0-1>,
   (error) "error_type": <0-2>,
   (request) "request_type": <0-1>,
@@ -107,15 +107,46 @@ server:
   "id": int,
   "type": "question",
   "question_type": 0,
-  "question": "Question with any text as answer"
+  "question": "Question with yes / no as answer"
 }
 ```
 
-client:
+client reply:
 ```json
 {
   "type": "answer",
   "answer_to": <id of question message>,
   "answer": bool
+}
+```
+
+### 2 - Multiple Choice
+server:
+```json
+{
+  "id": int,
+  "type": "question",
+  "question_type": 2,
+  "question": "Question",
+  "choices": ["choice 1", "choice 2", ...]
+}
+```
+
+client reply:
+```json
+{
+  "type": "answer",
+  "answer_to": <id of question message>,
+  "answer": int  // choice index
+}
+```
+
+## stats
+```json
+{
+  "type": "stats",
+  "ranking": [
+    [score, "client"]
+  ]
 }
 ```

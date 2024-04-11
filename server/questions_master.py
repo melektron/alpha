@@ -13,18 +13,18 @@ import json
 import os
 
 
-class QuestionsMaster:
+class _QuestionsMaster:
     __instance = ...
 
     def __new__(cls, *args, **kwargs):
         if cls.__instance is ...:
             ic("new QuestionsMaster instance")
-            cls.__instance = super(QuestionsMaster, cls).__new__(cls)
+            cls.__instance = super(_QuestionsMaster, cls).__new__(cls)
 
         return cls.__instance
 
     def __init__(self) -> None:
-        self._questions = {}
+        self._questions = ...
 
     def load_from_file(self, filepath: str) -> None:
         """
@@ -37,6 +37,10 @@ class QuestionsMaster:
 
         self._questions = json.load(open(filepath, "r"))
 
+    @property
+    def questions(self) -> dict:
+        return self._questions.copy()
+
     def get_random_question(
             self,
             n_questions: int = 1,
@@ -48,18 +52,26 @@ class QuestionsMaster:
         if question_types is ...:
             question_pool = [
                 {
-                    "question_type": {"text": 0}[t],
+                    "question_type": {
+                        "text": 0,
+                        "yesno": 1,
+                        "choices": 2
+                    }[t],
                     **question
-                } for t in self._questions for question in self._questions[t]
+                } for t in self.questions for question in self.questions[t]
             ]
 
         else:
+            ic(question_types)
             question_pool = []
 
             if "text" in question_types:
-                question_pool.extend(self._questions["text"])
+                question_pool.extend(self.questions["text"])
 
             if len(question_pool) < 1:
-                raise ValueError(f"No Questions for Pools {question_types}")
+                raise ValueError(f"No Questions for pools {question_types}")
 
         return random.sample(question_pool, n_questions)
+
+
+QuestionsMaster = _QuestionsMaster()

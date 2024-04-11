@@ -11,11 +11,6 @@
       "match_case": false
     },
     {
-      "question": "Who wrote the play \"Hamlet\"?",
-      "valid": ["William Shakespeare", "Shakespeare"],
-      "match_case": false
-    },
-    {
       "question": "What is the chemical Symbol for water?",
       "valid": ["H2O"],
       "match_case": true
@@ -39,6 +34,68 @@
       "question": "What is the currency of Japan?",
       "valid": ["Yen"],
       "match_case": false
+    },
+    {
+      "question": "What is the capital of Australia?",
+      "valid": ["Canberra"],
+      "match_case": false
+    },
+    {
+      "question": "How many continents are there?",
+      "valid": ["7"],
+      "match_case": true
+    },
+    {
+      "question": "What is the largest ocean on Earth?",
+      "valid": ["Pacific", "Pacific Ocean"],
+      "match_case": false
+    },
+    {
+      "question": "What is the tallest mountain in the world?",
+      "valid": ["Everest", "Mount Everest"],
+      "match_case": false
+    },
+    {
+      "question": "What is the chemical symbol for oxygen?",
+      "valid": ["O"],
+      "match_case": true
+    },
+    {
+      "question": "What is the largest organ in the human boxy?",
+      "valid": ["Skin"],
+      "match_case": false
+    },
+    {
+      "question": "What is the chemical symbol for carbon?",
+      "valid": ["C"],
+      "match_case": true
+    },
+    {
+      "question": "What is the hardest natural substance on Earth?",
+      "valid": ["Diamond"],
+      "match_case": false
+    },
+    {
+      "question": "What is the main ingredient in guacamole?",
+      "valid": ["Avocado"],
+      "match_case": false
+    },
+    {
+      "question": "What is the largest desert in the world?",
+      "valid": ["Antarctica"],
+      "match_case": false
+    },
+    {
+      "question": "What is the smallest prime number?",
+      "valid": ["2"],
+      "match_case": true
+    }
+  ],
+  "choices": [
+    {
+      "question": "Who wrote the play \"Hamlet\"?",
+      "choices": ["Ronald D. Eisenhower", "William Shakespeare", "Amadeus Mozart", "Winston Churchill"],
+      "valid": [1]
     }
   ]
 }
