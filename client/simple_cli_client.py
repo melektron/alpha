@@ -16,7 +16,6 @@ async def send_json(s: socket.socket, data: dict, loop) -> None:
 
 async def recv_json(s: socket.socket, loop) -> dict:
     data = await loop.sock_recv(s, 1024)
-    print(data)
     return json.loads(data.decode('utf-8'))
 
 
@@ -57,7 +56,6 @@ async def main(loop) -> None:
         question = await recv_json(client, loop)
         match question["type"]:
             case "question":
-                print(question)
                 print("\n", question["question"])
 
                 if question["question_type"] == 2:
