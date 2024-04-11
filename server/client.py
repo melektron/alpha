@@ -309,8 +309,8 @@ class Client:
                             "error_type": 2  # InvalidRequest
                         })
 
-            # except KeyError:
-            except KeyboardInterrupt:
+            except KeyError:
+            # except KeyboardInterrupt:
                 await self.send_client({
                     "type": "error",
                     "error_type": 3  # InvalidMessage
