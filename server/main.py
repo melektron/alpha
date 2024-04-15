@@ -10,54 +10,6 @@ HOST = '0.0.0.0'
 PORT = 5555
 
 
-# def load_questions(filename, num_questions):
-#     questions = []
-#     with open(filename, 'r') as file:
-#         for line in file:
-#             question, answer = line.strip().split(';')
-#             questions.append((question, answer))
-#         questions = random.sample(questions, num_questions)
-#     return questions
-#
-#
-# def handle_client(connection, address):
-#     print(f"Connected to {address}")
-#     score = 0
-#     total_questions = len(questions)
-#
-#     name = connection.recv(1024).decode().strip()
-#     connection.sendall(f"Hallo {name}. Wir wünschen dir viel Spaß bei diesem kleinem Quiz. \n".encode())
-#
-#     for i, (question, answer) in enumerate(questions, start=1):
-#         connection.sendall(question.encode())
-#         client_answer = connection.recv(1024).decode().strip()
-#         if client_answer.lower() == answer.lower():
-#             score += 1
-#             connection.sendall("Correct!\n".encode())
-#         else:
-#             connection.sendall(f"Incorrect!\nThe correct answer is {answer}\n".encode())
-#
-#     connection.sendall(f"Your final score is {score}/{total_questions}\n".encode())
-#     update_leaderboard(name, score)
-#     print(f"Connection with {address} closed.")
-#     connection.close()
-#
-#
-# def get_leaderboard():
-#     sorted_leaderboard = sorted(leaderboard.items(), key=operator.itemgetter(1), reverse=True)
-#     leaderboard_str = ""
-#     for i, (name, score) in enumerate(sorted_leaderboard, start=1):
-#         leaderboard_str += f"{i}. {name}: {score}\n"
-#     return leaderboard_str
-#
-#
-# def update_leaderboard(name, score):
-#     leaderboard[name] = score
-#     with open('leaderboard.txt', 'a') as file:
-#         for name, score in leaderboard.items():
-#             file.write(f"{name};{score};{len(questions)}\n")
-
-
 class Server:
     def __init__(self, host: str, port: int, loop: asyncio.AbstractEventLoop):
         self._address = (host, port)

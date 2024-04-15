@@ -7,6 +7,7 @@ the connection and login screens
 Author:
 Nilusink
 """
+from CTkMessagebox import CTkMessagebox
 from client_comms import Client
 import customtkinter as ctk
 import typing as tp
@@ -97,6 +98,7 @@ class LoginScreen(ctk.CTkFrame):
             fg_color="transparent",
             font=("Arial", 32)
         )
+        self._animation_parameter = -1
 
     def on_connect(self):
         self._loop.create_task(self._on_connect())
@@ -108,6 +110,8 @@ class LoginScreen(ctk.CTkFrame):
         # show loading screen
         self.centerer.grid_forget()
         self.connecting.grid(row=1, column=1, sticky="nsew")
+        self._animation_parameter = 0
+        self._update_animation()
 
         # try to connect
         if await self._client.connect(self.entry.get().strip()):
@@ -115,12 +119,49 @@ class LoginScreen(ctk.CTkFrame):
             self.entry.configure(placeholder_text="Nickname")
             self.entry.delete(0, ctk.END)
             self.centerer.focus_set()
+            self._animation_parameter = -1
+
+        else:
+            msg = CTkMessagebox(
+                title="Connection Error!",
+                message=f"Failed to connect to \"{self.entry.get().strip()}\"",
+                icon="warning",
+            )
 
         self.connecting.grid_forget()
         self.centerer.grid(row=1, column=1, sticky="nsew")
+        self._animation_parameter = -1
 
     def on_login(self) -> None:
         self._loop.create_task(self._on_login())
+
+    def _update_animation(self) -> None:
+        """
+        update the updating animation
+        """
+        if self._animation_parameter < 0:
+            return
+
+        # re-call own function
+        self.after(200, self._update_animation)
+
+        if self._animation_parameter == 0:
+            self.connecting.configure(text="Connecting  ..")
+
+        elif self._animation_parameter == 1:
+            self.connecting.configure(text="Connecting . .")
+
+        elif self._animation_parameter == 2:
+            self.connecting.configure(text="Connecting .. ")
+
+        elif self._animation_parameter == 5:
+            self._animation_parameter = 0
+            return
+
+        else:
+            self.connecting.configure(text="Connecting ...")
+
+        self._animation_parameter += 1
 
     async def _on_login(self) -> None:
         """
