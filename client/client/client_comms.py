@@ -7,6 +7,7 @@ Defines, how a client should communicate with the server
 Author:
 Nilusink
 """
+from ._question_handler import QuestionHandler
 import asyncio
 import socket
 import json
@@ -16,13 +17,19 @@ class Client:
     def __init__(
             self,
             event_loop: asyncio.AbstractEventLoop,
+            handler: QuestionHandler
     ) -> None:
+        self._handler = handler
+
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._socket.setblocking(False)
         self._socket.settimeout(2)
+
         self._loop_future = ...
         self._loop = event_loop
+
         self._username = ...
+
         self.running = True
 
     @property
@@ -106,11 +113,13 @@ class Client:
 
             try:
                 match request_data["type"]:
-                    case "login":
-                        ...
+                    case "question":
+                        print("question")
+                        self._handler.queue_question(request_data)
 
-                    case "answer":
-                        ...
+                    # case "answer":
+                    #     # happens only once on successful login
+                    #     ...
 
             except KeyError:
                 continue

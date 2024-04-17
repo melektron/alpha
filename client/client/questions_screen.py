@@ -7,6 +7,7 @@ It's literally in the file name, what did you expect?
 Author:
 Nilusink
 """
+from ._question_handler import QuestionHandler
 from .client_comms import Client
 import customtkinter as ctk
 # import asyncio
@@ -17,6 +18,7 @@ class QuestionsScreen(ctk.CTkFrame):
             self,
             parent,
             client: Client,
+            handler: QuestionHandler,
             *args,
             **kwargs
     ) -> None:
@@ -29,14 +31,11 @@ class QuestionsScreen(ctk.CTkFrame):
             **kwargs
         )
         self._client = client
+        self._handler = handler
+        self._handler.on_new_question(self._on_new_question)
 
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
-
-        self._questions_box = ctk.CTkFrame(
-            self,
-            fg_color="#dcdcdc"
-        )
 
         # waiting for game start
         self._waiting_box = ctk.CTkFrame(
@@ -65,11 +64,27 @@ class QuestionsScreen(ctk.CTkFrame):
         self._animation_parameter = 0
         self._update_animation()
 
+        # actual question
+        self._questions_box = ctk.CTkFrame(
+            self,
+            fg_color="#dcdcdc"
+        )
+
     def grid(self, **kwargs):
         super().grid(**kwargs)
 
         # update username on grid
         self._nickname_label.configure(text=self._client.username)
+
+    def _on_new_question(self, handler: QuestionHandler) -> None:
+        """
+        a new question appeared
+        """
+        print("screen")
+        question = handler.next()
+
+        self._waiting_box.grid_forget()
+        self._questions_box.grid(row=0, column=0, sticky="nsew")
 
     def _update_animation(self) -> None:
         """

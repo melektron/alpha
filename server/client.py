@@ -224,7 +224,11 @@ class Client:
         try:
             request = await self._loop.sock_recv(self._socket, 1024)
 
-        except (socket.gaierror, ConnectionAbortedError) as e:
+        except (
+                socket.gaierror,
+                ConnectionAbortedError,
+                ConnectionResetError
+        ) as e:
             ic("closed: ", e)
             self.close()
             return None

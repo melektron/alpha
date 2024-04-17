@@ -86,6 +86,7 @@ class Server:
         try:
             while True:
                 await aioconsole.ainput('Press enter to start! ')
+                ic("starting questions")
 
                 # stop accepting clients
                 self._accepting = False
