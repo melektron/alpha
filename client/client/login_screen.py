@@ -8,7 +8,7 @@ Author:
 Nilusink
 """
 from CTkMessagebox import CTkMessagebox
-from client_comms import Client
+from .client_comms import Client
 import customtkinter as ctk
 import typing as tp
 import asyncio
@@ -122,7 +122,7 @@ class LoginScreen(ctk.CTkFrame):
             self._animation_parameter = -1
 
         else:
-            msg = CTkMessagebox(
+            CTkMessagebox(
                 title="Connection Error!",
                 message=f"Failed to connect to \"{self.entry.get().strip()}\"",
                 icon="warning",
@@ -134,6 +134,22 @@ class LoginScreen(ctk.CTkFrame):
 
     def on_login(self) -> None:
         self._loop.create_task(self._on_login())
+
+    async def _on_login(self) -> None:
+        """
+        try to log in to server
+        """
+        # show loading screen
+        self.centerer.grid_forget()
+        self.connecting.grid(row=1, column=1, sticky="nsew")
+
+        # try to connect
+        if await self._client.login(self.entry.get().strip()):
+            self.button.configure(command=self.on_login)
+            return self._callback()
+
+        self.connecting.grid_forget()
+        self.centerer.grid(row=1, column=1, sticky="nsew")
 
     def _update_animation(self) -> None:
         """
@@ -162,19 +178,3 @@ class LoginScreen(ctk.CTkFrame):
             self.connecting.configure(text="Connecting ...")
 
         self._animation_parameter += 1
-
-    async def _on_login(self) -> None:
-        """
-        try to log in to server
-        """
-        # show loading screen
-        self.centerer.grid_forget()
-        self.connecting.grid(row=1, column=1, sticky="nsew")
-
-        # try to connect
-        if await self._client.login(self.entry.get().strip()):
-            self.button.configure(command=self.on_login)
-            return self._callback()
-
-        self.connecting.grid_forget()
-        self.centerer.grid(row=1, column=1, sticky="nsew")

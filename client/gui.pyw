@@ -7,10 +7,11 @@ basically a Kahoot clone
 Author:
 Nilusink
 """
-from questions_screen import QuestionsScreen
-from login_screen import LoginScreen
-from client_comms import Client
+from client.questions_screen import QuestionsScreen
+from client.login_screen import LoginScreen
+from client.client_comms import Client
 import customtkinter as ctk
+import tkinter as tk
 import asyncio
 
 
@@ -23,6 +24,7 @@ class Window(ctk.CTk):
 
         # window config
         self.title("KaYeet")
+        self.iconbitmap("./assets/icon.ico")
         self.attributes("-fullscreen", True)
 
         self.grid_rowconfigure(0, weight=1)
@@ -36,7 +38,8 @@ class Window(ctk.CTk):
         )
         self._login_screen.grid(row=0, column=0, sticky="nsew")
 
-        self._questions_screen = QuestionsScreen(self)
+        self._questions_screen = QuestionsScreen(self, self._client)
+        # self.logged_in()
 
     async def run(self) -> None:
         while self.running:

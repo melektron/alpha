@@ -22,7 +22,15 @@ class Client:
         self._socket.settimeout(2)
         self._loop_future = ...
         self._loop = event_loop
+        self._username = ...
         self.running = True
+
+    @property
+    def username(self) -> str:
+        """
+        the username the client has logged in with
+        """
+        return self._username
 
     async def connect(self, host: str, port: int = 5555) -> bool:
         """
@@ -51,6 +59,8 @@ class Client:
 
         reply = await self.receive_message()
         if reply["type"] == "answer":
+            self._username = username
+            print(username, self._username)
             self._loop_future = self._loop.create_task(self.run())
             return True
 
