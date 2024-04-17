@@ -13,19 +13,29 @@ const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
         {
+            name: 'index',
             path: '/',
+            redirect: { name: 'home' }
+        },
+        {
             name: 'home',
+            path: '/home',
             component: () => import('../views/HomeView.vue')
         },
         {
-            path: '/about',
             name: 'about',
-            component: () => import('../views/AboutView.vue')
+            path: '/about',
+            component: () => import('../views/AboutView.vue'),
         },
         {
-            path: "/wstest",
             name: "wstest",
+            path: "/wstest",
             component: () => import("../views/WSTestView.vue")
+        },
+        {
+            name: "kayeet",
+            path: "/kayeet",
+            component: () => import("../views/KaYeetView.vue"),
         }
     ]
 })
