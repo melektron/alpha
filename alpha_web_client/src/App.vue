@@ -9,15 +9,15 @@ Main UI entry component
 
 <script setup lang="ts">
 
-import { RouterLink, RouterView } from 'vue-router'
-import { ref } from 'vue';
+import { RouterLink, RouterView, onBeforeRouteUpdate, useRoute } from 'vue-router'
+import { computed, effect, ref } from 'vue';
 import type { MenuItem } from 'primevue/menuitem';
 
 const menuitems = ref<MenuItem[]>([
     {
         label: 'Home',
         icon: 'pi pi-home', 
-        url: '/'
+        url: '/home'
     },
     {
         label: 'About',
@@ -28,19 +28,38 @@ const menuitems = ref<MenuItem[]>([
         label: 'WS Test',
         icon: 'pi pi-sort-alt', 
         url: '/wstest'
+    },
+    {
+        label: 'KaYeet?!',
+        icon: 'pi pi-sort-alt', 
+        url: '/kayeet'
     }
 ])
+
+// to check whether we are on kayeet, as that shouldn't show the sidebar there
+const route = useRoute();
+const shouldShowSidebar = computed(() => !(route.path.startsWith("/kayeet") || route.path === "/"));    // bit hacky but works
+effect(() => {
+    console.log(`shouldntshowsidebar: ${route.path}`)
+})
 
 </script>
 
 
 <template>
-    <div class="main-layout">
-        <div class="logo-wrapper">
-            <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-        </div>
 
-        <div class="menu-wrapper">
+    <!-- Change layout to hide or show sidebar -->
+    <div :class="{
+        'main-layout': true,
+        'ml-sidebar': shouldShowSidebar,
+        'ml-fullscreen': !shouldShowSidebar
+    }">
+
+        <!-- Sidebar (logo + menu)-->
+        <div v-if="shouldShowSidebar" class="logo-wrapper">
+            <img alt="Vue logo" class="logo" src="@/assets/kayeet_logo.png" width="125" height="125" />
+        </div>
+        <div v-if="shouldShowSidebar" class="menu-wrapper">
             <Menu :model="menuitems">
                 <template #item="{ item, props }">
                     <RouterLink v-if="item.url" v-slot="{ href, navigate }" :to="item.url" custom>
@@ -57,12 +76,12 @@ const menuitems = ref<MenuItem[]>([
                 </template>
             </Menu>
         </div>
-
+        
+        <!-- Main content -->
         <div class="main-wrapper">
-
             <RouterView />
-
         </div>
+
     </div>
 </template>
 
@@ -70,17 +89,26 @@ const menuitems = ref<MenuItem[]>([
 <style scoped>
 .main-layout {
     display: grid;
+    gap: 20px;
+    height: 100vh;
+    max-height: 100vh;
+    width: 100vw;
+    max-width: 100vw;
+}
+.ml-sidebar {
     grid-template-areas:
         "logo main"
         "menu main";
     grid-template-rows: auto minmax(0, 1fr);
     grid-template-columns: auto 1fr;
-    gap: 20px;
     padding: 20px;
-    height: 100vh;
-    max-height: 100vh;
-    width: 100vw;
-    max-width: 100vw;
+}
+.ml-fullscreen {
+    grid-template-areas:
+        "main";
+    grid-template-rows: 1fr;
+    grid-template-columns: 1fr;
+    padding: 0px;
 }
 
 .main-layout>.logo-wrapper {

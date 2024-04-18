@@ -18,9 +18,17 @@ const counter = useCounterStore();
 
 <template>
     <main>
-        <h1>This is an about page</h1>
-        <h2>{{ counter.count }}</h2>
-        <button @click="counter.count++">incr</button>
+        <h1>Alpha - The OpenSource learning platform</h1>
+        <p>
+            Alpha is a set of open source tools to store and learn study material,
+            mainly directed at school topics such as vocabulary.
+            There is also a fun collaborative game feature called KaYeet?! (for no
+            particular reason at all).
+        </p>
+
+
+        <h2>Some random number: {{ counter.count }}</h2>
+        <button @click="counter.count++">Ooo nice button to clicki clicki</button>
     </main>
 </template>
 
