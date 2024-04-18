@@ -72,12 +72,15 @@ class LoginScreen(ctk.CTkFrame):
         self.entry = ctk.CTkEntry(
             login_box,
             fg_color="#ffffff",
+            text_color="#000000",
             border_color="#cccccc",
             font=("Arial", 32),
             placeholder_text="host ip",
             placeholder_text_color="#cccccc",
-            justify="center"
+            justify="center",
         )
+        self.entry.bind('<Return>', lambda *_: self.on_connect())
+
         self.entry.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
 
         self.button = ctk.CTkButton(

@@ -7,6 +7,7 @@ Defines how a client should be handled
 Author:
 Nilusink
 """
+from websockets.legacy.server import WebSocketServerProtocol
 from questions_master import QuestionsMaster
 from time import perf_counter
 from icecream import ic
@@ -205,7 +206,6 @@ class Client:
 
     @score.setter
     def score(self, value: int) -> None:
-        ic("new score: ", value)
         self._score = value
 
     async def send_client(self, message: dict) -> None:
@@ -324,3 +324,39 @@ class Client:
         self.running = False
         self._socket.close()
         CLIENTS.remove(self)
+
+
+class WsClient(Client):
+    def __init__(self, client: WebSocketServerProtocol) -> None:
+        super().__init__(...)
+        self._socket = client
+
+    async def send_client(self, message: dict) -> None:
+        """
+        send a message to the user
+        """
+        await self._socket.send(json.dumps(message))
+
+    async def receive_client(self) -> dict | None:
+        """
+        receive a message from the client
+        """
+        try:
+            request = await self._socket.recv()
+
+        except (
+                socket.gaierror,
+                ConnectionAbortedError,
+                ConnectionResetError
+        ) as e:
+            ic("closed: ", e)
+            self.close()
+            return None
+
+        if request == b"":
+            ic("client disconnect", self.username)
+            self.close()
+            return
+
+        ic("new message: ", request)
+        return json.loads(request.decode('utf8'))

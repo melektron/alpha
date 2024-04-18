@@ -40,6 +40,7 @@ class Window(ctk.CTk):
         self._questions_screen = QuestionsScreen(
             self,
             self._client,
+            loop,
             self._handler
         )
         # self.logged_in()
