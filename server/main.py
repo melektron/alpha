@@ -10,7 +10,7 @@ import socket
 
 HOST = '0.0.0.0'
 PORT = 5555
-WS_PORT = 6666
+WS_PORT = 1647
 
 
 class Server:

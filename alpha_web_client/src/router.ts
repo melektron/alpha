@@ -20,22 +20,22 @@ const router = createRouter({
         {
             name: 'home',
             path: '/home',
-            component: () => import('../views/HomeView.vue')
+            component: () => import('./views/HomeView.vue')
         },
         {
             name: 'about',
             path: '/about',
-            component: () => import('../views/AboutView.vue'),
+            component: () => import('./views/AboutView.vue'),
         },
         {
             name: "wstest",
             path: "/wstest",
-            component: () => import("../views/WSTestView.vue")
+            component: () => import("./views/WSTestView.vue")
         },
         {
             name: "kayeet",
             path: "/kayeet",
-            component: () => import("../views/KaYeetView.vue"),
+            component: () => import("./views/KaYeetView.vue"),
         }
     ]
 })
