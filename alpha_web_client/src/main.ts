@@ -33,6 +33,7 @@ import InputText from 'primevue/inputtext';
 import InputGroup from 'primevue/inputgroup';
 import ConfirmDialog from 'primevue/confirmdialog';
 import ConfirmationService from 'primevue/confirmationservice';
+import FloatLabel from 'primevue/floatlabel';
 
 const app = createApp(App);
 
@@ -56,6 +57,7 @@ app.component('InputGroup', InputGroup);
 app.component('Splitter', Splitter);
 app.component('SplitterPanel', SplitterPanel);
 app.component('ConfirmDialog', ConfirmDialog);
+app.component('FloatLabel', FloatLabel);
 
 
 app.mount('#app');
