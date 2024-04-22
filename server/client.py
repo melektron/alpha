@@ -8,6 +8,7 @@ Author:
 Nilusink
 """
 from websockets.legacy.server import WebSocketServerProtocol
+from websockets.exceptions import ConnectionClosedOK
 from questions_master import QuestionsMaster
 from time import perf_counter
 from icecream import ic
@@ -347,16 +348,22 @@ class WsClient(Client):
         except (
                 socket.gaierror,
                 ConnectionAbortedError,
-                ConnectionResetError
+                ConnectionResetError,
+                ConnectionClosedOK
         ) as e:
             ic("closed: ", e)
-            self.close()
+            await self.close()
             return None
 
         if request == b"":
             ic("client disconnect", self.username)
-            self.close()
+            await self.close()
             return
 
         ic("new message: ", request)
         return json.loads(request.decode('utf8'))
+
+    async def close(self) -> None:
+        self.running = False
+        await self._socket.close()
+        CLIENTS.remove(self)

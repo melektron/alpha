@@ -1,3 +1,12 @@
+"""
+main.py
+?. April 2024
+
+Server shenanigans
+
+Author:
+Nilusink
+"""
 from websockets.legacy.server import WebSocketServerProtocol
 from questions_master import QuestionsMaster
 from client import Client, CLIENTS, WsClient
@@ -10,7 +19,7 @@ import socket
 
 HOST = '0.0.0.0'
 PORT = 5555
-WS_PORT = 6666
+WS_PORT = 1647
 
 
 class Server:
@@ -43,7 +52,6 @@ class Server:
             try:
                 ic("waiting")
                 c, _ = await self._loop.sock_accept(self._socket)
-                # c, _ = self._socket.accept()
                 ic("new client")
 
             except TimeoutError:
@@ -72,6 +80,7 @@ class Server:
         the same as receive_clients, but for websockets
         """
         async def wrapper(c: WebSocketServerProtocol):
+            ic("new websocket client")
             client = WsClient(c)
 
             if self._accepting:
@@ -89,6 +98,10 @@ class Server:
             await asyncio.Future()  # run forever
 
     async def run(self):
+        """
+        run everything
+        """
+        # save to garbage
         _ = self._loop.create_task(self.receive_clients())
         _ = self._loop.create_task(self.receive_ws_clients())
         ic("created task")

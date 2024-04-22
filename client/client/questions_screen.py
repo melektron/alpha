@@ -12,6 +12,7 @@ from ._question_handler import ChoiceQuestion, Question
 from .client_comms import Client
 import customtkinter as ctk
 import asyncio
+import math
 
 
 class QuestionsScreen(ctk.CTkFrame):
@@ -94,7 +95,8 @@ class QuestionsScreen(ctk.CTkFrame):
         )
 
         self._text_question_box.grid_rowconfigure((0, 1), weight=1)
-        self._text_question_box.grid_columnconfigure(0, weight=1)
+        self._text_question_box.grid_columnconfigure((0, 2), weight=1)
+        self._text_question_box.grid_columnconfigure(1, weight=2)
 
         self._text_question_entry = ctk.CTkEntry(
             self._text_question_box,
@@ -105,7 +107,7 @@ class QuestionsScreen(ctk.CTkFrame):
             border_color="#dddddd"
 
         )
-        self._text_question_entry.grid(row=0, column=0, sticky="s", padx=20, pady=20)
+        self._text_question_entry.grid(row=0, column=1, sticky="sew", padx=20, pady=20)
         self._text_question_entry.bind(
             '<Return>',
             lambda *_: self._answer_text_question()
@@ -117,7 +119,7 @@ class QuestionsScreen(ctk.CTkFrame):
             text="Submit",
             command=self._answer_text_question
         )
-        self._text_question_done_button.grid(row=1, column=0, sticky="n", padx=20)
+        self._text_question_done_button.grid(row=1, column=1, sticky="new", padx=20)
 
         # multiple choice questions
         self._choice_box = ctk.CTkFrame(
@@ -125,6 +127,7 @@ class QuestionsScreen(ctk.CTkFrame):
             corner_radius=25,
             fg_color="#bbbbbb"
         )
+        self._choice_widgets: list[ctk.CTkButton] = []
 
     def grid(self, **kwargs):
         super().grid(**kwargs)
@@ -148,6 +151,7 @@ class QuestionsScreen(ctk.CTkFrame):
         self._question_title.configure(text=question.question)
 
         if isinstance(question, TextQuestion):
+            self._choice_box.grid_forget()
             self._text_question_box.grid(
                 row=1,
                 column=0,
@@ -157,10 +161,52 @@ class QuestionsScreen(ctk.CTkFrame):
             )
 
         elif isinstance(question, YesNoQuestion):
-            ...
+            raise NotImplementedError("Yes No Questions do not exist yet!")
 
         elif isinstance(question, ChoiceQuestion):
-            ...
+            self._text_question_box.grid_forget()
+            self._choice_box.grid(
+                row=1,
+                column=0,
+                sticky="nsew",
+                padx=40,
+                pady=50
+            )
+
+            # generate answer boxes
+            ## de-configure the grid
+            self._choice_box.grid_rowconfigure(list(range(10)), weight=0)
+            self._choice_box.grid_columnconfigure(list(range(10)), weight=0)
+
+            n_answers = len(question.choices)
+            per_row = math.ceil(math.sqrt(n_answers))
+            per_column = math.ceil(n_answers / per_row)
+
+            ## configure grid
+            self._choice_box.grid_rowconfigure(list(range(per_row)), weight=1)
+            self._choice_box.grid_columnconfigure(list(range(per_column)), weight=1)
+
+            # destroy all previously created widgets
+            for widget in self._choice_widgets:
+                widget.grid_forget()
+                widget.destroy()
+
+            self._choice_widgets.clear()
+
+            for row in range(per_row):
+                for column in range(per_column):
+                    index = row * per_row + column
+
+                    if index + 1 > len(question.choices):
+                        break
+
+                    tmp = ctk.CTkButton(
+                        self._choice_box,
+                        text=question.choices[index],
+                        command=lambda i=index: self._answer_choice_question(i)
+                    )
+                    tmp.grid(row=row, column=column, sticky="nsew", padx=15, pady=15)
+                    self._choice_widgets.append(tmp)
 
         else:
             raise ValueError(
@@ -188,7 +234,7 @@ class QuestionsScreen(ctk.CTkFrame):
         # re-arrange UI
         self._text_question_box.grid_forget()
         self._questions_box.grid_forget()
-        self._waiting_box.grid(row=0, column=1, sticky="nsew")
+        self._waiting_box.grid(row=0, column=0, sticky="nsew")
 
     def _answer_choice_question(self, choice: int) -> None:
         """
@@ -201,6 +247,11 @@ class QuestionsScreen(ctk.CTkFrame):
         self._loop.create_task(self._client.send_message(
             self._current_question.answer(choice)
         ))
+
+        # re-arrange UI
+        self._choice_box.grid_forget()
+        self._questions_box.grid_forget()
+        self._waiting_box.grid(row=0, column=0, sticky="nsew")
 
     def _update_animation(self) -> None:
         """

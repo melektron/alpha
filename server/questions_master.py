@@ -50,7 +50,7 @@ class _QuestionsMaster:
         """
         selects n_questions questions from all selected pools
         """
-        question_types = ("choices",)
+        # question_types = ("choices",)
         if question_types is ...:
             question_pool = [
                 {
@@ -68,15 +68,21 @@ class _QuestionsMaster:
             question_pool = []
 
             if "text" in question_types:
-                question_pool.extend(self.questions["text"])
+                question_pool.extend([{
+                    "question_type": 0,
+                    **q
+                } for q in self.questions["text"]])
 
             if "choices" in question_types:
-                question_pool.extend(self.questions["choices"])
+                question_pool.extend([{
+                    "question_type": 2,
+                    **q
+                } for q in self.questions["choices"]])
 
             if len(question_pool) < 1:
                 raise ValueError(f"No Questions for pools {question_types}")
 
-        question_pool = [question_pool[0],] * 100
+        # question_pool = [question_pool[0],] * 100
 
         return random.sample(question_pool, n_questions)
 

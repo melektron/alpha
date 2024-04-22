@@ -118,24 +118,31 @@ class LoginScreen(ctk.CTkFrame):
 
         # try to connect
         if await self._client.connect(self.entry.get().strip()):
+            # if connection succeed, re-configure widgets to display
+            # nickname login
             self.button.configure(command=self.on_login)
+            self.entry.unbind('<Return>')
+            self.entry.bind('<Return>', lambda *_: self.on_login())
             self.entry.configure(placeholder_text="Nickname")
             self.entry.delete(0, ctk.END)
             self.centerer.focus_set()
             self._animation_parameter = -1
 
         else:
+            # some kind of error occurred when trying to connect
             CTkMessagebox(
                 title="Connection Error!",
                 message=f"Failed to connect to \"{self.entry.get().strip()}\"",
                 icon="warning",
             )
 
+        # switch to waiting screen
         self.connecting.grid_forget()
         self.centerer.grid(row=1, column=1, sticky="nsew")
         self._animation_parameter = -1
 
     def on_login(self) -> None:
+        # synced to async
         self._loop.create_task(self._on_login())
 
     async def _on_login(self) -> None:
@@ -164,6 +171,7 @@ class LoginScreen(ctk.CTkFrame):
         # re-call own function
         self.after(200, self._update_animation)
 
+        # animation states
         if self._animation_parameter == 0:
             self.connecting.configure(text="Connecting  ..")
 
