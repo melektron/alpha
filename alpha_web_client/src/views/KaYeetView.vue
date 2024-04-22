@@ -9,8 +9,17 @@ Home page with overview
 
 <script setup lang="ts">
 
+import { ref } from 'vue';
+import { useKaYeetGame } from '@/stores/kayeet';
+
+const game = useKaYeetGame();
+
+// the value of the server textbox
+const host_entry = ref<string>("");
+
+
 function connectToGame(payload: Event) {
-    console.log("Connecting to:", payload)
+    game.connectToGameServer(host_entry.value);
 }
 
 </script>
@@ -18,13 +27,30 @@ function connectToGame(payload: Event) {
 
 <template>
     <main>
-        <div class="connect-wrapper">
+        <div v-if="game.is_connection_phase" class="connect-wrapper">
+            <h1> KaYeet?! KaYeet!! </h1>
+            <Card>
+                <template #content>
+                    <form @submit.prevent="connectToGame" class="connect-form">
+                        <FloatLabel>
+                            <InputText id="host" v-model="host_entry" placeholder="Game Host Address" />
+                            <label for="host">Host</label>
+                        </FloatLabel>
+                        <Button type="submit">Join Game</Button>
+                    </form>
+                </template>
+            </Card>
+        </div>
+
+        <div v-if="game.is_login_phase" class="connect-wrapper">
             <h1> KaYeet?! KaYeet!! </h1>
             <form @submit.prevent="connectToGame" class="connect-form">
-                <InputText placeholder="Game Host Address" />
+                <InputText v-model="host_entry" placeholder="Username" />
                 <Button type="submit">Join Game</Button>
             </form>
         </div>
+
+
     </main>
 </template>
 
@@ -43,8 +69,8 @@ main {
 .connect-form {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    padding: 20px;
+    gap: 1rem;
+    padding: 1rem;
     background-color: var(--surface-400);
     border-radius: 10px;
 }

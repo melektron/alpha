@@ -32,7 +32,7 @@ export const useTestSocket = defineStore("test_socket", () => {
     const socket_state = ref(SocketState.DISCONNECTED);
     const incoming_count = ref(0);
     const outgoing_count = ref(0);
-    const communication_log = useLocalStorage<CommEvent[]>("comm_log", []);//ref<CommEvent[]>([]);
+    const communication_log = useLocalStorage<CommEvent[]>("alpha_comm_log", []);//ref<CommEvent[]>([]);
 
     function onOpen(this: WebSocket, e: Event): void {
         socket_state.value = SocketState.CONNECTED;
@@ -71,8 +71,9 @@ export const useTestSocket = defineStore("test_socket", () => {
         }
 
         socket_state.value = SocketState.CONNECTING;
-
-        socket = new WebSocket("ws://localhost:1647/");
+        //socket = new WebSocket("ws://localhost:1647/");
+        socket = new WebSocket("ws://10.10.217.208:1647/");
+        
         socket.onopen = onOpen;
         socket.onmessage = onMessage;
         socket.onerror = onError;
