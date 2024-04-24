@@ -8,7 +8,8 @@ Main application entry point
 */
 
 import './assets/main.css';
-import 'primevue/resources/themes/lara-dark-cyan/theme.css'
+//import 'primevue/resources/themes/lara-dark-cyan/theme.css'
+import 'primevue/resources/themes/aura-light-lime/theme.css'
 
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
@@ -34,6 +35,7 @@ import InputGroup from 'primevue/inputgroup';
 import ConfirmDialog from 'primevue/confirmdialog';
 import ConfirmationService from 'primevue/confirmationservice';
 import FloatLabel from 'primevue/floatlabel';
+import Message from 'primevue/message';
 
 const app = createApp(App);
 
@@ -58,6 +60,7 @@ app.component('Splitter', Splitter);
 app.component('SplitterPanel', SplitterPanel);
 app.component('ConfirmDialog', ConfirmDialog);
 app.component('FloatLabel', FloatLabel);
+app.component('Message', Message);
 
 
 app.mount('#app');

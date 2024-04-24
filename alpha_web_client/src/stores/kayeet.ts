@@ -4,58 +4,127 @@ Written by melektron
 www.elektron.work
 31.12.23, 20:52
 
-Manages the integrated test websocket client
+Manages the kayeet game state
 */
 
-import { ref, computed } from "vue"
-import { defineStore } from "pinia"
+import { ref, computed } from "vue";
+import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
-
-
-let socket: WebSocket | null = null;
+import { t, StateMachine } from "@/utils/reactive_fsm";
+import mitt from "mitt";
 
 
 // possible library to help with this? https://github.com/eram/typescript-fsm
-export enum GameState {
+export enum GameStates {
     /* Disconnected States */
     DISCONNECTED,       // not connected, shows disconnected screen
     READY_TO_CONNECT,   // still not connected but now showing user the option to enter server addr
     CONNECTING,         // awaiting connection to open
+    CONNECTION_FAILED,  // websocket connection has failed
     /* Connected States */ 
-    READY_TO_LOG_IN,    // connected, now waiting for user login
+    READY_TO_LOG_IN,    // websocket connected, now waiting for user to log in
     AWAITING_LOGIN_ACK, // login message sent, waiting for login to be acknowledged
     LOGIN_ERROR,        // login failed, shows the failed error page
     LOGGED_IN           // logged in, waiting for game to start
 }
 
+export enum GameEvents {
+    ACK_ERROR = "ACK_ERROR",
+    ATTEMPT_CONNECT = "ATTEMPT_CONNECT",
+    CONNECTION_SUCCESS = "CONNECTION_SUCCESS",
+    CONNECTION_ERROR = "CONNECTION_ERROR",
+    LOGIN_REQ_SENT = "LOGIN_REQ_SENT",
+    LOGIN_NAK_RECEIVED = "LOGIN_NAK_RECEIVED",
+    LOGIN_ACK_RECEIVED = "LOGIN_ACK_RECEIVED",
+
+    UNCONDITIONAL_RESET = "UNCONDITIONAL_RESET"
+}
+
+
 export const useKaYeetGame = defineStore("kayeet", () => {
-    
-    const game_state = ref(GameState.READY_TO_CONNECT);
+
+    let socket: WebSocket | null = null;
+    const transitions = [
+        /* fromState                    event                           toState                         callback */
+        t(GameStates.READY_TO_CONNECT,  GameEvents.ATTEMPT_CONNECT,     GameStates.CONNECTING,          _attemptConnect),
+        t(GameStates.CONNECTING,        GameEvents.CONNECTION_SUCCESS,  GameStates.READY_TO_LOG_IN,     undefined),
+        t(GameStates.CONNECTING,        GameEvents.CONNECTION_ERROR,    GameStates.CONNECTION_FAILED,   _connectionFailed),
+        t(GameStates.READY_TO_LOG_IN,   GameEvents.LOGIN_REQ_SENT,      GameStates.AWAITING_LOGIN_ACK,  undefined),
+        t(GameStates.AWAITING_LOGIN_ACK,GameEvents.LOGIN_NAK_RECEIVED,  GameStates.LOGIN_ERROR,         undefined),
+        t(GameStates.AWAITING_LOGIN_ACK,GameEvents.LOGIN_ACK_RECEIVED,  GameStates.LOGGED_IN,           undefined),
+        
+        // error acknowledgement
+        t(GameStates.DISCONNECTED,      GameEvents.ACK_ERROR,           GameStates.READY_TO_CONNECT,    undefined),
+        t(GameStates.CONNECTION_FAILED, GameEvents.ACK_ERROR,           GameStates.READY_TO_CONNECT,    undefined),
+        t(GameStates.LOGIN_ERROR,       GameEvents.ACK_ERROR,           GameStates.READY_TO_CONNECT,    undefined),
+
+        // resets
+        t(GameStates.DISCONNECTED,      GameEvents.UNCONDITIONAL_RESET, GameStates.READY_TO_CONNECT,    _unconditionalReset),
+        t(GameStates.READY_TO_CONNECT,  GameEvents.UNCONDITIONAL_RESET, GameStates.READY_TO_CONNECT,    _unconditionalReset),
+        t(GameStates.CONNECTING,        GameEvents.UNCONDITIONAL_RESET, GameStates.READY_TO_CONNECT,    _unconditionalReset),
+        t(GameStates.CONNECTION_FAILED, GameEvents.UNCONDITIONAL_RESET, GameStates.READY_TO_CONNECT,    _unconditionalReset),
+        t(GameStates.READY_TO_LOG_IN,   GameEvents.UNCONDITIONAL_RESET, GameStates.READY_TO_CONNECT,    _unconditionalReset),
+        t(GameStates.AWAITING_LOGIN_ACK,GameEvents.UNCONDITIONAL_RESET, GameStates.READY_TO_CONNECT,    _unconditionalReset),
+        t(GameStates.LOGIN_ERROR,       GameEvents.UNCONDITIONAL_RESET, GameStates.READY_TO_CONNECT,    _unconditionalReset),
+        t(GameStates.LOGGED_IN,         GameEvents.UNCONDITIONAL_RESET, GameStates.READY_TO_CONNECT,    _unconditionalReset),
+    ];
+
+    // state machine representing the game's state
+    const machine = new StateMachine(GameStates.READY_TO_CONNECT, transitions);
 
     /*
      * WebSocket callbacks 
      */
-
     function _onOpen(this: WebSocket, e: Event): void {
-        game_state.value = GameState.READY_TO_LOG_IN;
+        machine.dispatch(GameEvents.CONNECTION_SUCCESS);
         console.info("Socket Connected");
     }
     function _onMessage(this: WebSocket, e: MessageEvent) {
         console.log("Got message:", e.data)
     }
     function _onError(this: WebSocket, e: Event) {
+        machine.dispatch(GameEvents.CONNECTION_ERROR);
         console.error("Socket Error CB");
     }
     function _onClose(this: WebSocket, e: CloseEvent) {
+        // TODO: maybe transition do disconnected (when transition is allowed will still need to be though about)
         console.info(`Socket Disconnected with code ${e.code} (${e.reason})`);
         socket = null;
-        game_state.value = GameState.DISCONNECTED;
+    }
+
+    /**
+     * FSM callbacks
+     */
+
+    function _attemptConnect(url: URL) {
+        socket = new WebSocket(url);
+        socket.onopen = _onOpen;
+        socket.onmessage = _onMessage;
+        socket.onerror = _onError;
+        socket.onclose = _onClose;
+    }
+    function _connectionFailed() {
+        // immediately switch back to 
+        machine.dispatch(GameEvents.ACK_ERROR)
+    }
+
+    /**
+     * game is being reset to starting state. This function is 
+     * meant to clean up any side effects (such as the socket connection)
+     * outside the FSM
+     */
+    function _unconditionalReset(): void {
+        // close the socket if it is still open.
+        if (socket)
+        {
+            socket.close();
+            socket = null;
+        }
     }
 
     /*
      * Internal functions
      */
-
     function sendMessage(content: string) {
         if (!socket)
             return;
@@ -95,42 +164,23 @@ export const useKaYeetGame = defineStore("kayeet", () => {
      */
 
     function connectToGameServer(host: string) {
-        // if already connected, disconnect and connect to new server
-        if (game_state.value >= GameState.READY_TO_LOG_IN && socket !== null) {
-            socket.close(0);
-            socket = null;
+        // if already connected, this doesn't make sense
+        if (machine.state >= GameStates.READY_TO_LOG_IN) {
+            console.warn("connectToGameServer() called while not in ready state, ignoring");
+            return
         }
 
         const url = completeURL(host);
-        game_state.value = GameState.CONNECTING;
-        socket = new WebSocket(url);
-        socket.onopen = _onOpen;
-        socket.onmessage = _onMessage;
-        socket.onerror = _onError;
-        socket.onclose = _onClose;
-    }    
+        machine.dispatch(GameEvents.ATTEMPT_CONNECT, url);
+    }
 
-
-    function disconnect() {
-        if (!socket)
-            return;
-
-        socket.close();
+    async function reset() {
+        await machine.dispatch(GameEvents.UNCONDITIONAL_RESET);
     }
 
     return {
-        game_state,
+        state: computed(() => machine.state),
         connectToGameServer,
-        disconnect,
-        is_connection_phase: computed(() => [
-            GameState.READY_TO_CONNECT, 
-            GameState.CONNECTING
-        ].includes(game_state.value)),
-        is_login_phase: computed(() => [
-            GameState.READY_TO_LOG_IN, 
-            GameState.AWAITING_LOGIN_ACK, 
-            GameState.LOGIN_ERROR, 
-            GameState.LOGGED_IN
-        ].includes(game_state.value))
+        reset,
     };
 })

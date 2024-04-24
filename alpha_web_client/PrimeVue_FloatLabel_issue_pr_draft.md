@@ -103,6 +103,9 @@ This was tested by finding the block
 
 ```css
 
+.p-float-label:has(textarea) label {
+    top: 1rem;
+}
 .p-float-label:has(input:focus) label,
 .p-float-label:has(input.p-filled) label,
 .p-float-label:has(input:-webkit-autofill) label,
@@ -120,6 +123,9 @@ in the browser and replacing it again with the old version:
 
 ```css
 
+.p-float-label textarea ~ label {
+    top: 1rem;
+}
 .p-float-label input:focus ~ label,
 .p-float-label input.p-filled ~ label,
 .p-float-label input:-webkit-autofill ~ label,
@@ -142,6 +148,9 @@ This can be done by replacing the code with the following snippet:
 ```css
 
 @supports selector(input:has(a)) {
+    .p-float-label:has(textarea) label {
+        top: 1rem;
+    }
     .p-float-label:has(input:focus) label,
     .p-float-label:has(input.p-filled) label,
     .p-float-label:has(input:-webkit-autofill) label,
@@ -149,11 +158,14 @@ This can be done by replacing the code with the following snippet:
     .p-float-label:has(textarea.p-filled) label,
     .p-float-label:has(.p-inputwrapper-focus) label,
     .p-float-label:has(.p-inputwrapper-filled) label {
-      top: -0.75rem;
-      font-size: 12px;
+        top: -0.75rem;
+        font-size: 12px;
     }
-  }
-  @supports not selector(input:has(a)) {
+}
+@supports not selector(input:has(a)) {
+    .p-float-label textarea ~ label {
+        top: 1rem;
+    }
     .p-float-label input:focus ~ label,
     .p-float-label input.p-filled ~ label,
     .p-float-label input:-webkit-autofill ~ label,
@@ -161,10 +173,10 @@ This can be done by replacing the code with the following snippet:
     .p-float-label textarea.p-filled ~ label,
     .p-float-label .p-inputwrapper-focus ~ label,
     .p-float-label .p-inputwrapper-filled ~ label {
-      top: -.75rem;
-      font-size: 12px;
+        top: -.75rem;
+        font-size: 12px;
     }
-  }
+}
 
 ```
 

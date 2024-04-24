@@ -23,8 +23,8 @@ class Window(ctk.CTk):
 
         # window config
         self.title("KaYeet")
-        self.iconbitmap("./assets/icon.ico")
-        self.attributes("-fullscreen", True)
+        #self.iconbitmap("./assets/icon.ico")
+        #self.attributes("-fullscreen", True)
 
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
