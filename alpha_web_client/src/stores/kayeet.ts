@@ -9,9 +9,8 @@ Manages the kayeet game state
 
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
-import { useLocalStorage } from "@vueuse/core";
 import { t, StateMachine } from "@/utils/reactive_fsm";
-import mitt from "mitt";
+import { ErrorCode, kayeet_message, login_message, type KayeetMessage, type LoginMessage } from "./kayeet_messages";
 
 
 // possible library to help with this? https://github.com/eram/typescript-fsm
@@ -33,9 +32,11 @@ export enum GameEvents {
     ATTEMPT_CONNECT = "ATTEMPT_CONNECT",
     CONNECTION_SUCCESS = "CONNECTION_SUCCESS",
     CONNECTION_ERROR = "CONNECTION_ERROR",
-    LOGIN_REQ_SENT = "LOGIN_REQ_SENT",
+    ATTEMPT_LOGIN = "LOGIN_REQ_SENT",
     LOGIN_NAK_RECEIVED = "LOGIN_NAK_RECEIVED",
     LOGIN_ACK_RECEIVED = "LOGIN_ACK_RECEIVED",
+
+    DISCONNECTED = "DISOCNNECTED",
 
     UNCONDITIONAL_RESET = "UNCONDITIONAL_RESET"
 }
@@ -49,7 +50,10 @@ export const useKaYeetGame = defineStore("kayeet", () => {
         t(GameStates.READY_TO_CONNECT,  GameEvents.ATTEMPT_CONNECT,     GameStates.CONNECTING,          _attemptConnect),
         t(GameStates.CONNECTING,        GameEvents.CONNECTION_SUCCESS,  GameStates.READY_TO_LOG_IN,     undefined),
         t(GameStates.CONNECTING,        GameEvents.CONNECTION_ERROR,    GameStates.CONNECTION_FAILED,   _connectionFailed),
-        t(GameStates.READY_TO_LOG_IN,   GameEvents.LOGIN_REQ_SENT,      GameStates.AWAITING_LOGIN_ACK,  undefined),
+        // going from connection to disconnected should do the same thing as connection failed.
+        // browsers don't call close or fail reliably, so both do the same thing, whichever is first.
+        t(GameStates.CONNECTING,        GameEvents.DISCONNECTED,        GameStates.CONNECTION_FAILED,   undefined),
+        t(GameStates.READY_TO_LOG_IN,   GameEvents.ATTEMPT_LOGIN,       GameStates.AWAITING_LOGIN_ACK,  _attemptLogin),
         t(GameStates.AWAITING_LOGIN_ACK,GameEvents.LOGIN_NAK_RECEIVED,  GameStates.LOGIN_ERROR,         undefined),
         t(GameStates.AWAITING_LOGIN_ACK,GameEvents.LOGIN_ACK_RECEIVED,  GameStates.LOGGED_IN,           undefined),
         
@@ -57,6 +61,12 @@ export const useKaYeetGame = defineStore("kayeet", () => {
         t(GameStates.DISCONNECTED,      GameEvents.ACK_ERROR,           GameStates.READY_TO_CONNECT,    undefined),
         t(GameStates.CONNECTION_FAILED, GameEvents.ACK_ERROR,           GameStates.READY_TO_CONNECT,    undefined),
         t(GameStates.LOGIN_ERROR,       GameEvents.ACK_ERROR,           GameStates.READY_TO_CONNECT,    undefined),
+        
+        // disconnects that go to disconnected state (to show it a general disconnect message) can happen during any of the fully connected states
+        t(GameStates.READY_TO_LOG_IN,   GameEvents.DISCONNECTED,        GameStates.DISCONNECTED,        undefined),
+        t(GameStates.AWAITING_LOGIN_ACK,GameEvents.DISCONNECTED,        GameStates.DISCONNECTED,        undefined),
+        t(GameStates.LOGIN_ERROR,       GameEvents.DISCONNECTED,        GameStates.DISCONNECTED,        undefined),
+        t(GameStates.LOGGED_IN,         GameEvents.DISCONNECTED,        GameStates.DISCONNECTED,        undefined),
 
         // resets
         t(GameStates.DISCONNECTED,      GameEvents.UNCONDITIONAL_RESET, GameStates.READY_TO_CONNECT,    _unconditionalReset),
@@ -76,20 +86,50 @@ export const useKaYeetGame = defineStore("kayeet", () => {
      * WebSocket callbacks 
      */
     function _onOpen(this: WebSocket, e: Event): void {
-        machine.dispatch(GameEvents.CONNECTION_SUCCESS);
         console.info("Socket Connected");
+        machine.dispatchIfPossible(GameEvents.CONNECTION_SUCCESS);
     }
     function _onMessage(this: WebSocket, e: MessageEvent) {
         console.log("Got message:", e.data)
+
+        let msg: KayeetMessage
+        try {
+            const data_obj = JSON.parse(e.data);
+            msg = kayeet_message.parse(data_obj);
+        } catch (error) {
+            console.error("Error parsing kayeet message (ignored):", error);
+            return;
+        }
+        switch (msg.type) {
+            case "confirm":
+                machine.dispatch(GameEvents.LOGIN_ACK_RECEIVED)
+                break;
+            
+            case "error":
+                console.log(`Received API error: ${ErrorCode[msg.error_type]}, cause: "${msg.cause ?? ""}"`)
+                switch (msg.error_type) {
+                    case ErrorCode.InvalidLogin:
+                        machine.dispatch(GameEvents.LOGIN_NAK_RECEIVED);
+                        break;
+                
+                    default:
+                        break;
+                }
+                break;
+        
+            default:
+                break;
+        }
+        
     }
     function _onError(this: WebSocket, e: Event) {
-        machine.dispatch(GameEvents.CONNECTION_ERROR);
         console.error("Socket Error CB");
+        machine.dispatchIfPossible(GameEvents.CONNECTION_ERROR);
     }
     function _onClose(this: WebSocket, e: CloseEvent) {
-        // TODO: maybe transition do disconnected (when transition is allowed will still need to be though about)
         console.info(`Socket Disconnected with code ${e.code} (${e.reason})`);
         socket = null;
+        machine.dispatchIfPossible(GameEvents.DISCONNECTED);
     }
 
     /**
@@ -104,8 +144,15 @@ export const useKaYeetGame = defineStore("kayeet", () => {
         socket.onclose = _onClose;
     }
     function _connectionFailed() {
-        // immediately switch back to 
+        // immediately acknowledge this error, going back to ready state
         machine.dispatch(GameEvents.ACK_ERROR)
+    }
+    function _attemptLogin(username: string) {
+        const msg: LoginMessage = {
+            type: "login",
+            username: username
+        }
+        sendMessage(msg);
     }
 
     /**
@@ -125,13 +172,13 @@ export const useKaYeetGame = defineStore("kayeet", () => {
     /*
      * Internal functions
      */
-    function sendMessage(content: string) {
+    function sendMessage(content: any) {
         if (!socket)
             return;
-        
-        socket.send(content);
 
-        console.log("sending message:", content)
+        const outstring = JSON.stringify(content);
+        socket.send(outstring);
+        console.log("sending message:", outstring)
     }
 
     /**
@@ -163,6 +210,10 @@ export const useKaYeetGame = defineStore("kayeet", () => {
      * Public functions
      */
 
+    async function reset() {
+        await machine.dispatch(GameEvents.UNCONDITIONAL_RESET);
+    }
+
     function connectToGameServer(host: string) {
         // if already connected, this doesn't make sense
         if (machine.state >= GameStates.READY_TO_LOG_IN) {
@@ -170,17 +221,27 @@ export const useKaYeetGame = defineStore("kayeet", () => {
             return
         }
 
-        const url = completeURL(host);
-        machine.dispatch(GameEvents.ATTEMPT_CONNECT, url);
+        machine.dispatch(GameEvents.ATTEMPT_CONNECT, completeURL(host));
     }
 
-    async function reset() {
-        await machine.dispatch(GameEvents.UNCONDITIONAL_RESET);
+    function login(username: string) {
+        if (machine.state !== GameStates.READY_TO_LOG_IN) {
+            console.warn("login() called during invalid state, ignoring")
+            return
+        }
+
+        machine.dispatch(GameEvents.ATTEMPT_LOGIN, username);
+    }
+
+    function acknowledgeError() {
+        machine.dispatch(GameEvents.ACK_ERROR);
     }
 
     return {
+        reset,
         state: computed(() => machine.state),
         connectToGameServer,
-        reset,
+        login,
+        acknowledgeError,
     };
 })

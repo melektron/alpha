@@ -85,6 +85,13 @@ export class StateMachine<
         // if none is found it's a terminal state.
         return this.transitions.every((trans) => (trans.from_state !== this.current_state.value));
     }
+    
+    async dispatchIfPossible<E extends EVENT>(event: E, ...args: unknown[]): Promise<void> {
+        if (this.can(event))
+            this.dispatch(event, ...args);
+        else
+            console.log(`Doing nothing because there is no transition from ${String(this.state)} with event ${String(event)}`)
+    }
  
     // post event async
     async dispatch<E extends EVENT>(event: E, ...args: unknown[]): Promise<void> {

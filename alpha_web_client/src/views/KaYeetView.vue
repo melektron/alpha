@@ -21,24 +21,14 @@ const game = useKaYeetGame();
 // old game state to detect changes
 let old_game_state = game.state;
 
-// variables to determine element visibility
-const is_connection_phase =  computed(() => [
-    GameStates.READY_TO_CONNECT, 
-    GameStates.CONNECTING
-].includes(game.state));
-const is_login_phase =  computed(() => [
-    GameStates.READY_TO_LOG_IN, 
-    GameStates.AWAITING_LOGIN_ACK,
-    GameStates.LOGIN_ERROR, 
-    GameStates.LOGGED_IN
-].includes(game.state))
-
 // stage form visibility flags
 const show_connect_card = ref<boolean>(true);
 const show_login_card = ref<boolean>(false);
+const show_disconnected_dialog = ref<boolean>(false);
 
 // event awaiters
 const connect_card_left = new AwaitableEvent<Element>();
+const login_card_left = new AwaitableEvent<Element>();
 
 // connect form state
 const host_entry = ref<string>("");
@@ -64,21 +54,39 @@ function connectToGame(payload: Event) {
 
 // login form state
 const username_entry = ref<string>("");
+function loginButtonHandler(payload: Event) {
+    game.login(username_entry.value);
+}
+
+// disconnected modal
+function disconnectModelAcknowledge(e: Event) {
+    game.acknowledgeError();
+}
 
 watchEffect(async () => {
-    console.log(`Game state changed from ${old_game_state} to ${game.state}`);
+    console.log(`Game state changed from ${GameStates[old_game_state]} to ${GameStates[game.state]}`);
     old_game_state = game.state;
 
-    if (game.state === GameStates.CONNECTION_FAILED)
+    if (game.state === GameStates.READY_TO_CONNECT) {
+        show_login_card.value = false;
+        show_disconnected_dialog.value = false;
+        await login_card_left.next;
+        show_connect_card.value = true;
+    }
+
+    else if (game.state === GameStates.CONNECTION_FAILED)
         show_conn_failed_message.value = true;  // this is automatically 
 
-    else if (game.state === GameStates.READY_TO_LOG_IN)
-    {
+    else if (game.state === GameStates.READY_TO_LOG_IN) {
         show_connect_card.value = false;
         console.log("before")
         await connect_card_left.next;   // wait for animation
         console.log("after")
         show_login_card.value = true;
+    }
+    else if (game.state == GameStates.DISCONNECTED)
+    {
+        show_disconnected_dialog.value = true;
     }
 })
 
@@ -92,9 +100,9 @@ watchEffect(async () => {
             <h1> KaYeet?! KaYeet!! </h1>
             <div class="connect-card-wrapper"> 
                 <Transition name="fade-inout" @after-leave="(e) => connect_card_left.happened(e)">
-                    <Card v-if="show_connect_card" class="connect-card">
+                    <Card v-if="show_connect_card">
                         <template #content>
-                            <form @submit.prevent="connectToGame" class="connect-form">
+                            <form @submit.prevent="connectToGame" class="setup-form">
                                 <FloatLabel>
                                     <InputText id="host" v-model="host_entry" placeholder="localhost" :style="{width: '100%'}" />
                                     <label for="host">Game Server</label>
@@ -121,10 +129,10 @@ watchEffect(async () => {
                     </Card>
                 </Transition>
 
-                <Transition name="fade-inout">
-                    <Card v-if="show_login_card" class="connect-card">
+                <Transition name="fade-inout" @after-leave="(e) => login_card_left.happened(e)">
+                    <Card v-if="show_login_card">
                         <template #content>
-                            <form @submit.prevent="connectToGame" class="connect-form">
+                            <form @submit.prevent="loginButtonHandler" class="setup-form">
                                 <FloatLabel>
                                     <InputText id="host" v-model="username_entry" :style="{width: '100%'}" />
                                     <label for="host">Username</label>
@@ -134,6 +142,21 @@ watchEffect(async () => {
                         </template>
                     </Card>
                 </Transition>
+
+                <Dialog v-model:visible="show_disconnected_dialog" modal :style="{ width: '18rem' }">
+                    <template #container="{ closeCallback }">
+                        <div class="flex flex-column align-items-center p-5 surface-overlay border-round">
+                            <div class="border-circle bg-primary inline-flex justify-content-center align-items-center h-6rem w-6rem -mt-8">
+                                <i class="pi pi-question text-5xl"></i>
+                            </div>
+                            <span class="font-bold text-2xl block mb-2 mt-4">Connection lost</span>
+                            <p class="mb-0">You have been disconnected from the game server.</p>
+                            <div class="flex align-items-center gap-2 mt-4">
+                                <Button label="Go back to start" @click="disconnectModelAcknowledge"></Button>
+                            </div>
+                        </div>
+                    </template>
+                </Dialog>
             </div>
         </div>
     </main>
@@ -160,19 +183,13 @@ main {
     position: relative;
 }
 
-.connect-card {
-    /*position: absolute;*/
-    top: 0px;
-    left: 0px;
-}
-
-.connect-form {
+.setup-form {
     display: flex;
     flex-direction: column;
     gap: 1rem;
 }
 
-.connect-form  > * {
+.setup-form  > * {
     width: 100%;
 }
 

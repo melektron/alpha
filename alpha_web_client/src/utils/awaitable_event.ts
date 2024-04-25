@@ -16,6 +16,11 @@ export class AwaitableEvent<ET> {
         });
     }
 
+    //// makes a thenable object that can be awaited
+    //then(resolve: Waiter<ET>, other: any): any {
+    //    this.waiters.push(resolve);
+    //}
+
     happened(e: ET) {
         this.waiters.forEach((p) => p(e))
         this.waiters = []
