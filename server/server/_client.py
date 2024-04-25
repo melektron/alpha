@@ -33,6 +33,7 @@ class Clients:
         self._clients: list["Client"] = []
         self._qid = 0
         self._unanswered = {}
+        self._answered = []
         self._question_time = 15
         self._current_timeout = ...
 
@@ -53,11 +54,6 @@ class Clients:
         """
         self._clients.append(client)
 
-    def on_new_client(self, callback: tp.Callable[["Client"], None]) -> None:
-        """
-        add a callback for every new client
-        """
-
     def remove(self, client: "Client") -> None:
         if client in self._clients:
             self._clients.remove(client)
@@ -67,6 +63,7 @@ class Clients:
         ask a question to all clients and handles scores
         """
         futures = []
+        self._answered.clear()
         for client in self._clients:
             futures.append(client.ask_question(question, self._qid))
             self._unanswered[self._qid] = {
@@ -110,6 +107,14 @@ class Clients:
             futures.append(question["client"].send_client({
                 "type": "error",
                 "error_type": 3
+            }))
+
+        # send results to all clients who answered
+        for answer in self._answered:
+            futures.append(answer["client"].send_client({
+                "type": "result",
+                "result_to": answer["question"]["id"],
+                "answer": answer["result"]
             }))
 
         self._unanswered.clear()
@@ -163,7 +168,13 @@ class Clients:
             ) * 1000)
 
         question["client"].score += points
-        ic(points)
+
+        self._answered.append({
+            "question": question,
+            "client": question["client"],
+            "points": points,
+            "result": answered
+        })
         return True
 
     async def send_statistics(self) -> None:
@@ -320,7 +331,6 @@ class Client:
                         })
 
             except KeyError:
-            # except KeyboardInterrupt:
                 await self.send_client({
                     "type": "error",
                     "error_type": 3  # InvalidMessage

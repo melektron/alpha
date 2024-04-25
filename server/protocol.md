@@ -141,6 +141,18 @@ client reply:
 }
 ```
 
+### all
+
+server reply:
+```json
+{
+  "type": "result",
+  "result_to": <id of question message>,
+  "result": bool
+}
+```
+
+
 ## stats
 ```json
 {

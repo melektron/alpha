@@ -7,8 +7,6 @@ It's literally in the file name, what did you expect?
 Author:
 Nilusink
 """
-# from ._question_handler import QuestionHandler, TextQuestion, YesNoQuestion
-# from ._question_handler import ChoiceQuestion, Question
 from ._client import CLIENTS
 from ._server import Server
 import customtkinter as ctk
@@ -158,7 +156,7 @@ class QuestionsScreen(ctk.CTkFrame):
             )
 
             # generate answer boxes
-            ## de-configure the grid
+            # de-configure the grid
             self._choice_box.grid_rowconfigure(list(range(10)), weight=0)
             self._choice_box.grid_columnconfigure(list(range(10)), weight=0)
 
@@ -166,7 +164,7 @@ class QuestionsScreen(ctk.CTkFrame):
             per_row = math.ceil(math.sqrt(n_answers))
             per_column = math.ceil(n_answers / per_row)
 
-            ## configure grid
+            # configure grid
             self._choice_box.grid_rowconfigure(list(range(per_row)), weight=1)
             self._choice_box.grid_columnconfigure(list(range(per_column)), weight=1)
 

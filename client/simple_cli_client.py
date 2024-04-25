@@ -7,19 +7,51 @@ import json
 PORT = 5555
 
 
-async def send_json(s: socket.socket, data: dict, loop) -> None:
+async def send_json(
+        s: socket.socket,
+        data: dict,
+        loop: asyncio.AbstractEventLoop
+) -> None:
+    """
+    wrapper for sending json objects through sockets
+
+    :param s: target socket
+    :param data: json object
+    :param loop: asyncio eventloop
+    """
     await loop.sock_sendall(
         s,
         json.dumps(data).encode('utf8')
     )
 
 
-async def recv_json(s: socket.socket, loop) -> dict:
+async def recv_json(
+        s: socket.socket,
+        loop: asyncio.AbstractEventLoop
+) -> dict:
+    """
+    wrapper for receiving json objects through sockets
+
+    :param s: target socket
+    :param loop: asyncio eventloop
+    :returns: json object
+    """
     data = await loop.sock_recv(s, 1024)
     return json.loads(data.decode('utf-8'))
 
 
-async def send_answer(client, question, loop) -> None:
+async def send_answer(
+        client,
+        question,
+        loop: asyncio.AbstractEventLoop
+) -> None:
+    """
+    wrapper for sending json objects through sockets
+
+    :param s: target socket
+    :param data: json object
+    :param loop: asyncio eventloop
+    """
     a = await aioconsole.ainput('Answer: ')
     await send_json(client, {
         "type": "answer",
@@ -32,7 +64,7 @@ async def send_answer(client, question, loop) -> None:
     }, loop)
 
 
-async def main(loop) -> None:
+async def main(loop: asyncio.AbstractEventLoop) -> None:
     host = input("Enter host: ")
 
     # clients = []
@@ -76,7 +108,7 @@ async def main(loop) -> None:
                 if question["question_type"] == 2:
                     print(f"Choices: {question["choices"]}")
 
-                loop.create_task(send_answer(client, question, loop))
+                _ = loop.create_task(send_answer(client, question, loop))
 
             case "stats":
                 print(f"\nSTATISTICS: {question['ranking']}")
