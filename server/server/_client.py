@@ -1,5 +1,5 @@
 """
-client.py
+_client.py
 11. April 2024
 
 Defines how a client should be handled
@@ -9,7 +9,7 @@ Nilusink
 """
 from websockets.legacy.server import WebSocketServerProtocol
 from websockets.exceptions import ConnectionClosedOK
-from questions_master import QuestionsMaster
+from ._questions_master import QuestionsMaster
 from time import perf_counter
 from icecream import ic
 import typing as tp
@@ -52,6 +52,11 @@ class Clients:
         add a client to the clients
         """
         self._clients.append(client)
+
+    def on_new_client(self, callback: tp.Callable[["Client"], None]) -> None:
+        """
+        add a callback for every new client
+        """
 
     def remove(self, client: "Client") -> None:
         if client in self._clients:
@@ -176,6 +181,9 @@ class Clients:
     def __iter__(self) -> tp.Iterator:
         return iter(self._clients)
 
+    # def close_all(self) -> None:
+    #
+
 
 CLIENTS = Clients()
 
@@ -290,7 +298,7 @@ class Client:
                         self._username = username
                         ic("client logged in as ", username)
                         await self.send_client({
-                            "type": "answer"
+                            "type": "confirm"
                         })
 
                     case "answer":
@@ -361,7 +369,7 @@ class WsClient(Client):
             return
 
         ic("new message: ", request)
-        return json.loads(request.decode('utf8'))
+        return json.loads(request)
 
     async def close(self) -> None:
         self.running = False

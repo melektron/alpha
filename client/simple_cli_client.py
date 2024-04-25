@@ -35,6 +35,9 @@ async def send_answer(client, question, loop) -> None:
 async def main(loop) -> None:
     host = input("Enter host: ")
 
+    # clients = []
+
+    # for _ in range(19):
     print("connecting...", end="\r")
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.connect((host, PORT))
@@ -42,6 +45,7 @@ async def main(loop) -> None:
 
     print("connected     ")
     username = input("Enter username: ")
+    # username = f"User {_}"
 
     await send_json(client, {"type": "login", "username": username}, loop)
     answer = await recv_json(client, loop)
@@ -49,6 +53,17 @@ async def main(loop) -> None:
     if answer["type"] == "error":
         print(f"Failed to log in: {answer["reason"]}")
         return
+
+        # clients.append(client)
+
+    #     await asyncio.sleep(.5)
+    #
+    # await asyncio.sleep(5)
+    # for client in clients:
+    #     client.close()
+    #     await asyncio.sleep(.5)
+
+    # exit(0)
 
     print("waiting for game to start ...")
 

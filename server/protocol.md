@@ -23,7 +23,7 @@ client:
 server answer:
 ```json
 {
-  "type": "answer"
+  "type": "confirm"
 }
 ```
 
@@ -70,7 +70,7 @@ Can occur if the user is already signed in or the questioning has already starte
 ```json
 {
   "type": "error",
-  "error_type": 3
+  "error_type": 4
 }
 ```
 
@@ -106,7 +106,7 @@ server:
 {
   "id": int,
   "type": "question",
-  "question_type": 0,
+  "question_type": 1,
   "question": "Question with yes / no as answer"
 }
 ```
