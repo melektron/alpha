@@ -106,7 +106,7 @@ class Clients:
         for question in self._unanswered.values():
             futures.append(question["client"].send_client({
                 "type": "error",
-                "error_type": 3
+                "error_type": 4 # QuestionTimeout
             }))
 
         # send results to all clients who answered

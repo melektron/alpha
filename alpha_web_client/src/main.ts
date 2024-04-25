@@ -38,6 +38,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 import FloatLabel from 'primevue/floatlabel';
 import Message from 'primevue/message';
 import Dialog from 'primevue/dialog';
+import Image from 'primevue/image';
 
 const app = createApp(App);
 
@@ -64,6 +65,7 @@ app.component('ConfirmDialog', ConfirmDialog);
 app.component('FloatLabel', FloatLabel);
 app.component('Message', Message);
 app.component('Dialog', Dialog);
+app.component('Image', Image);
 
 
 app.mount('#app');

@@ -24,7 +24,14 @@ export enum GameStates {
     READY_TO_LOG_IN,    // websocket connected, now waiting for user to log in
     AWAITING_LOGIN_ACK, // login message sent, waiting for login to be acknowledged
     LOGIN_ERROR,        // login failed, shows the failed error page
-    LOGGED_IN           // logged in, waiting for game to start
+    LOGGED_IN,          // logged in, waiting for game to start
+
+    QUESTION_TEXT,      // show a text input question
+    QUESTION_YES_NO,    // show a yes/no question
+    QUESTION_MULTI,     // show a multiple choice question
+    AWAITING_RESULT,    // awaiting the question result (answer has been selected by user)
+    DISPLAYING_RESULT,  // displays the question result (wether we were correct, incorrect or timed out)
+    DISPLAYING_SCORES, // displays the leader board of all users
 }
 
 export enum GameEvents {
@@ -36,8 +43,15 @@ export enum GameEvents {
     LOGIN_NAK_RECEIVED = "LOGIN_NAK_RECEIVED",
     LOGIN_ACK_RECEIVED = "LOGIN_ACK_RECEIVED",
 
-    DISCONNECTED = "DISOCNNECTED",
+    RECEIVED_TEXT_Q = "RECEIVED_TEXT_Q",
+    RECEIVED_YES_NO_Q = "RECEIVED_YES_NO_Q",
+    RECEIVED_MULTI_Q = "RECEIVED_MULTI_Q",
+    SUBMIT_ANSWER = "SUBMIT_ANSWER",
+    ANSWER_TIMEOUT = "ANSWER_TIMEOUT",
+    RESULT_RECEIVED = "RESULT_RECEIVED",
+    STATS_RECEIVED = "STATS_RECEIVED",
 
+    DISCONNECTED = "DISOCNNECTED",
     UNCONDITIONAL_RESET = "UNCONDITIONAL_RESET"
 }
 
@@ -61,12 +75,42 @@ export const useKaYeetGame = defineStore("kayeet", () => {
         t(GameStates.DISCONNECTED,      GameEvents.ACK_ERROR,           GameStates.READY_TO_CONNECT,    undefined),
         t(GameStates.CONNECTION_FAILED, GameEvents.ACK_ERROR,           GameStates.READY_TO_CONNECT,    undefined),
         t(GameStates.LOGIN_ERROR,       GameEvents.ACK_ERROR,           GameStates.READY_TO_CONNECT,    undefined),
+
+        // questioning procedure
+        // enter question from initial logged in screen
+        t(GameStates.LOGGED_IN,         GameEvents.RECEIVED_TEXT_Q,     GameStates.QUESTION_TEXT,       undefined),
+        t(GameStates.LOGGED_IN,         GameEvents.RECEIVED_YES_NO_Q,   GameStates.QUESTION_YES_NO,     undefined),
+        t(GameStates.LOGGED_IN,         GameEvents.RECEIVED_MULTI_Q,    GameStates.QUESTION_MULTI,      undefined),
+        // enter question after displaying scores
+        t(GameStates.DISPLAYING_SCORES, GameEvents.RECEIVED_TEXT_Q,     GameStates.QUESTION_TEXT,       undefined),
+        t(GameStates.DISPLAYING_SCORES, GameEvents.RECEIVED_YES_NO_Q,   GameStates.QUESTION_YES_NO,     undefined),
+        t(GameStates.DISPLAYING_SCORES, GameEvents.RECEIVED_MULTI_Q,    GameStates.QUESTION_MULTI,      undefined),
+        // continue from question when submitting an answer
+        t(GameStates.QUESTION_TEXT,     GameEvents.SUBMIT_ANSWER,       GameStates.AWAITING_RESULT,     undefined),
+        t(GameStates.QUESTION_YES_NO,   GameEvents.SUBMIT_ANSWER,       GameStates.AWAITING_RESULT,     undefined),
+        t(GameStates.QUESTION_MULTI,    GameEvents.SUBMIT_ANSWER,       GameStates.AWAITING_RESULT,     undefined),
+        // continue from question when answer times out
+        t(GameStates.QUESTION_TEXT,     GameEvents.ANSWER_TIMEOUT,      GameStates.DISPLAYING_RESULT,   undefined),
+        t(GameStates.QUESTION_YES_NO,   GameEvents.ANSWER_TIMEOUT,      GameStates.DISPLAYING_RESULT,   undefined),
+        t(GameStates.QUESTION_MULTI,    GameEvents.ANSWER_TIMEOUT,      GameStates.DISPLAYING_RESULT,   undefined),
+        // after submission wait, transition to showing results
+        t(GameStates.AWAITING_RESULT,   GameEvents.RESULT_RECEIVED,     GameStates.DISPLAYING_RESULT,   undefined),
+        // we might get a timeout after submitting a question if a race condition occurs due to network delays. This accounts for that.
+        t(GameStates.AWAITING_RESULT,   GameEvents.ANSWER_TIMEOUT,      GameStates.DISPLAYING_RESULT,   undefined),
+        // after the own results are displayed, show the leader board
+        t(GameStates.DISPLAYING_RESULT, GameEvents.STATS_RECEIVED,      GameStates.DISPLAYING_SCORES,   undefined),
         
         // disconnects that go to disconnected state (to show it a general disconnect message) can happen during any of the fully connected states
         t(GameStates.READY_TO_LOG_IN,   GameEvents.DISCONNECTED,        GameStates.DISCONNECTED,        undefined),
         t(GameStates.AWAITING_LOGIN_ACK,GameEvents.DISCONNECTED,        GameStates.DISCONNECTED,        undefined),
         t(GameStates.LOGIN_ERROR,       GameEvents.DISCONNECTED,        GameStates.DISCONNECTED,        undefined),
         t(GameStates.LOGGED_IN,         GameEvents.DISCONNECTED,        GameStates.DISCONNECTED,        undefined),
+        t(GameStates.QUESTION_TEXT,     GameEvents.DISCONNECTED,        GameStates.DISCONNECTED,        undefined),
+        t(GameStates.QUESTION_YES_NO,   GameEvents.DISCONNECTED,        GameStates.DISCONNECTED,        undefined),
+        t(GameStates.QUESTION_MULTI,    GameEvents.DISCONNECTED,        GameStates.DISCONNECTED,        undefined),
+        t(GameStates.AWAITING_RESULT,   GameEvents.DISCONNECTED,        GameStates.DISCONNECTED,        undefined),
+        t(GameStates.DISPLAYING_RESULT, GameEvents.DISCONNECTED,        GameStates.DISCONNECTED,        undefined),
+        t(GameStates.DISPLAYING_SCORES, GameEvents.DISCONNECTED,        GameStates.DISCONNECTED,        undefined),
 
         // resets
         t(GameStates.DISCONNECTED,      GameEvents.UNCONDITIONAL_RESET, GameStates.READY_TO_CONNECT,    _unconditionalReset),
@@ -77,6 +121,12 @@ export const useKaYeetGame = defineStore("kayeet", () => {
         t(GameStates.AWAITING_LOGIN_ACK,GameEvents.UNCONDITIONAL_RESET, GameStates.READY_TO_CONNECT,    _unconditionalReset),
         t(GameStates.LOGIN_ERROR,       GameEvents.UNCONDITIONAL_RESET, GameStates.READY_TO_CONNECT,    _unconditionalReset),
         t(GameStates.LOGGED_IN,         GameEvents.UNCONDITIONAL_RESET, GameStates.READY_TO_CONNECT,    _unconditionalReset),
+        t(GameStates.QUESTION_TEXT,     GameEvents.UNCONDITIONAL_RESET, GameStates.READY_TO_CONNECT,    _unconditionalReset),
+        t(GameStates.QUESTION_YES_NO,   GameEvents.UNCONDITIONAL_RESET, GameStates.READY_TO_CONNECT,    _unconditionalReset),
+        t(GameStates.QUESTION_MULTI,    GameEvents.UNCONDITIONAL_RESET, GameStates.READY_TO_CONNECT,    _unconditionalReset),
+        t(GameStates.AWAITING_RESULT,   GameEvents.UNCONDITIONAL_RESET, GameStates.READY_TO_CONNECT,    _unconditionalReset),
+        t(GameStates.DISPLAYING_RESULT, GameEvents.UNCONDITIONAL_RESET, GameStates.READY_TO_CONNECT,    _unconditionalReset),
+        t(GameStates.DISPLAYING_SCORES, GameEvents.UNCONDITIONAL_RESET, GameStates.READY_TO_CONNECT,    _unconditionalReset),
     ];
 
     // state machine representing the game's state
@@ -110,6 +160,10 @@ export const useKaYeetGame = defineStore("kayeet", () => {
                 switch (msg.error_type) {
                     case ErrorCode.InvalidLogin:
                         machine.dispatch(GameEvents.LOGIN_NAK_RECEIVED);
+                        break;
+                    
+                    case ErrorCode.QuestionTimeout:
+                        //machine.dispatchIfPossible();
                         break;
                 
                     default:

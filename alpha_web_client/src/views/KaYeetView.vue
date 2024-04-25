@@ -16,19 +16,27 @@ import { watchEffect } from 'vue';
 import { nextTick } from 'vue';
 import { AwaitableEvent } from "@/utils/awaitable_event"
 import { any } from 'zod';
+import logo from '@/assets/kayeet_logo.png'
 
 const game = useKaYeetGame();
 // old game state to detect changes
-let old_game_state = game.state;
+let previous_game_state = game.state;
 
 // stage form visibility flags
 const show_connect_card = ref<boolean>(true);
 const show_login_card = ref<boolean>(false);
 const show_disconnected_dialog = ref<boolean>(false);
+const show_logged_in_text = ref<boolean>(false);
+
+watchEffect(() => console.log("show_connect_card", show_connect_card.value));
+watchEffect(() => console.log("show_login_card", show_login_card.value));
+watchEffect(() => console.log("show_disconnected_dialog", show_disconnected_dialog.value));
+watchEffect(() => console.log("show_logged_in_text", show_logged_in_text.value));
 
 // event awaiters
 const connect_card_left = new AwaitableEvent<Element>();
 const login_card_left = new AwaitableEvent<Element>();
+const logged_in_text_left  = new AwaitableEvent<Element>();
 
 // connect form state
 const host_entry = ref<string>("");
@@ -64,29 +72,43 @@ function disconnectModelAcknowledge(e: Event) {
 }
 
 watchEffect(async () => {
-    console.log(`Game state changed from ${GameStates[old_game_state]} to ${GameStates[game.state]}`);
-    old_game_state = game.state;
+    console.log(`Game state changed from ${GameStates[previous_game_state]} to ${GameStates[game.state]}`);
+    previous_game_state = game.state;
 
-    if (game.state === GameStates.READY_TO_CONNECT) {
-        show_login_card.value = false;
-        show_disconnected_dialog.value = false;
-        await login_card_left.next;
-        show_connect_card.value = true;
-    }
+    switch (game.state) {
+        case GameStates.READY_TO_CONNECT:
+            // only when transitioning from disconnected, should the event be awaited.
+            // otherwise this would cause unwanted side effects
+            if (previous_game_state !== GameStates.DISCONNECTED)
+                break;
+            show_login_card.value = false;
+            show_disconnected_dialog.value = false;
+            await login_card_left.next;
+            show_connect_card.value = true;
+            break;
+        
+        case GameStates.CONNECTION_FAILED:
+            show_conn_failed_message.value = true;  // this is automatically 
+            break;
 
-    else if (game.state === GameStates.CONNECTION_FAILED)
-        show_conn_failed_message.value = true;  // this is automatically 
-
-    else if (game.state === GameStates.READY_TO_LOG_IN) {
-        show_connect_card.value = false;
-        console.log("before")
-        await connect_card_left.next;   // wait for animation
-        console.log("after")
-        show_login_card.value = true;
-    }
-    else if (game.state == GameStates.DISCONNECTED)
-    {
-        show_disconnected_dialog.value = true;
+        case GameStates.READY_TO_LOG_IN:
+            show_connect_card.value = false;
+            await connect_card_left.next;   // wait for animation
+            show_login_card.value = true;
+            break;
+        
+        case GameStates.LOGGED_IN:
+            show_login_card.value = false;
+            await login_card_left.next;     // wait for animation
+            show_logged_in_text.value = true;
+            break;
+        
+        case GameStates.DISCONNECTED:
+            show_disconnected_dialog.value = true;
+            break;
+    
+        default:
+            break;
     }
 })
 
@@ -96,9 +118,12 @@ watchEffect(async () => {
 
 <template>
     <main>
-        <div class="connect-center-wrapper">
-            <h1> KaYeet?! KaYeet!! </h1>
-            <div class="connect-card-wrapper"> 
+        <div class="centering-wrapper">
+            <div class="kayeet-head-wrapper">
+                <img :src="logo">
+                <h1> KaYeet?! KaYeet!! </h1>
+            </div>
+            <div class="content-wrapper">
                 <Transition name="fade-inout" @after-leave="(e) => connect_card_left.happened(e)">
                     <Card v-if="show_connect_card">
                         <template #content>
@@ -143,21 +168,28 @@ watchEffect(async () => {
                     </Card>
                 </Transition>
 
-                <Dialog v-model:visible="show_disconnected_dialog" modal :style="{ width: '18rem' }">
-                    <template #container="{ closeCallback }">
-                        <div class="flex flex-column align-items-center p-5 surface-overlay border-round">
-                            <div class="border-circle bg-yellow-500 inline-flex justify-content-center align-items-center h-6rem w-6rem -mt-8">
-                                <i class="pi pi-exclamation-triangle text-5xl"></i>
-                            </div>
-                            <span class="font-bold text-2xl block mb-2 mt-4">Connection lost</span>
-                            <p class="mb-0">You have been disconnected from the game server.</p>
-                            <div class="flex align-items-center gap-2 mt-4">
-                                <Button label="Go back to start" @click="disconnectModelAcknowledge"></Button>
-                            </div>
-                        </div>
-                    </template>
-                </Dialog>
+                <Transition name="fade-inout" @after-leave="(e) => logged_in_text_left.happened(e)">
+                    <div>
+                        <h1 v-if="show_logged_in_text" class="logged-in-text">You are logged in as <b>{{ username_entry }}</b> !</h1>
+                        <h2 v-if="show_logged_in_text" class="logged-in-text">Get ready ... The thrill is about to begin!</h2>
+                    </div>
+                </Transition>
             </div>
+
+            <Dialog v-model:visible="show_disconnected_dialog" modal :style="{ width: '18rem' }">
+                <template #container="{ closeCallback }">
+                    <div class="flex flex-column align-items-center p-5 surface-overlay border-round">
+                        <div class="border-circle bg-yellow-500 inline-flex justify-content-center align-items-center h-6rem w-6rem -mt-8">
+                            <i class="pi pi-exclamation-triangle text-5xl"></i>
+                        </div>
+                        <span class="font-bold text-2xl block mb-2 mt-4">Connection lost</span>
+                        <p class="mb-0">You have been disconnected from the game server.</p>
+                        <div class="flex align-items-center gap-2 mt-4">
+                            <Button label="Go back to start" @click="disconnectModelAcknowledge"></Button>
+                        </div>
+                    </div>
+                </template>
+            </Dialog>
         </div>
     </main>
 </template>
@@ -175,23 +207,42 @@ main {
     background-color: var(--surface-ground);
 }
 
-.connect-center-wrapper {
-    width: 20rem;
+.kayeet-head-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.kayeet-head-wrapper > h1 {
+    text-align: center;
+}
+.kayeet-head-wrapper > img {
+    width: 12rem;
+    text-align: center;
 }
 
-.connect-card-wrapper {
-    position: relative;
+.content-wrapper {
+    max-height: 10rem;
+    transition: max-height 1s linear;
 }
 
 .setup-form {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    width: 18rem;
 }
 
-.setup-form  > * {
+.setup-form > * {
     width: 100%;
 }
+
+h1.logged-in-text {
+    margin-top: 1.5em;
+}
+.logged-in-text {
+    text-align: center;
+}
+
 
 .fade-inout-enter-active,
 .fade-inout-leave-active {
