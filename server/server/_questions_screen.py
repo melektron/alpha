@@ -104,7 +104,6 @@ class QuestionsScreen(ctk.CTkFrame):
         self._choice_box = ctk.CTkFrame(
             self._questions_box,
             corner_radius=25,
-            fg_color="#bbbbbb"
         )
         self._choice_widgets: list[ctk.CTkLabel] = []
 
@@ -188,6 +187,7 @@ class QuestionsScreen(ctk.CTkFrame):
                     tmp = ctk.CTkLabel(
                         self._choice_box,
                         text=question["choices"][index],
+                        font=("Arial", 48),
                     )
                     tmp.grid(row=row, column=column, sticky="nsew", padx=15, pady=15)
                     self._choice_widgets.append(tmp)

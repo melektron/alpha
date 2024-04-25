@@ -45,6 +45,7 @@ class Server:
         self._current_question = -1
 
         self._loop = loop
+        self._ = ...
 
     async def receive_clients(self):
         ic("receiving")
@@ -130,6 +131,10 @@ class Server:
 
         # start questioning
         self.create_questions(10)
+
+    def game_done(self) -> None:
+        # accept new clients
+        self._accepting = True
 
     async def run(self):
         """

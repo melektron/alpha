@@ -181,9 +181,6 @@ class Clients:
     def __iter__(self) -> tp.Iterator:
         return iter(self._clients)
 
-    # def close_all(self) -> None:
-    #
-
 
 CLIENTS = Clients()
 

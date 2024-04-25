@@ -80,6 +80,8 @@ class Window(ctk.CTk):
         """
         a question game is done
         """
+        self._server.game_done()
+
         self._questions_screen.grid_forget()
         self._waiting_room.grid(row=0, column=0, sticky="nsew")
 
@@ -99,4 +101,3 @@ if __name__ == "__main__":
     w = Window(HOST, PORT, WS_PORT, loop)
     loop.create_task(w.run())
     loop.run_forever()
-
