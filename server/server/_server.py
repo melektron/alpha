@@ -2,6 +2,7 @@ from ._questions_master import QuestionsMaster
 from ._client import Client, CLIENTS, WsClient
 from websockets.legacy.server import WebSocketServerProtocol
 from websockets.server import serve
+
 from icecream import ic
 import aioconsole
 import asyncio
@@ -158,6 +159,7 @@ class Server:
 
         except Exception as e:
             ic(e)
+            raise e
 
         finally:
             for client in CLIENTS:

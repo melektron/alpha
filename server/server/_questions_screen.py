@@ -10,6 +10,7 @@ Nilusink
 from ._client import CLIENTS
 from ._server import Server
 import customtkinter as ctk
+import typing as tp
 import asyncio
 import math
 
@@ -39,9 +40,7 @@ class QuestionsScreen(ctk.CTkFrame):
         self.grid_columnconfigure(0, weight=1)
 
         # waiting for game start
-        self._waiting_box = ctk.CTkFrame(
-            self,
-        )
+        self._waiting_box = ctk.CTkFrame(self)
         self._waiting_box.grid(row=0, column=0, sticky="nsew")
 
         self._waiting_box.grid_columnconfigure(0, weight=1)
@@ -65,9 +64,7 @@ class QuestionsScreen(ctk.CTkFrame):
         self._update_animation()
 
         # actual question
-        self._questions_box = ctk.CTkFrame(
-            self,
-        )
+        self._questions_box = ctk.CTkFrame(self)
 
         self._questions_box.grid_rowconfigure(0, weight=1)
         self._questions_box.grid_rowconfigure(1, weight=3)
@@ -79,6 +76,13 @@ class QuestionsScreen(ctk.CTkFrame):
             text="Le Question",
         )
         self._question_title.grid(row=0, column=0)
+
+        self._next_question_btn = ctk.CTkButton(
+            self._questions_box,
+            text="Next Question",
+            font=("Arial", 48),
+            command=lambda: self._synchronize(self._show_leaderboard())
+        )
 
         # text answered questions
         self._text_question_box = ctk.CTkFrame(
@@ -110,6 +114,12 @@ class QuestionsScreen(ctk.CTkFrame):
 
         super().grid(**kwargs)
 
+    def _synchronize(self, future: tp.Coroutine) -> None:
+        """
+        run an async function from a synchronized thread
+        """
+        self._loop.create_task(future)
+
     def _sync_new_question(self) -> None:
         self._loop.create_task(self._new_question())
 
@@ -118,6 +128,7 @@ class QuestionsScreen(ctk.CTkFrame):
         a new question appeared
         """
         self._current_question: dict = ...
+        self._next_question_btn.grid_forget()
 
         # get new question
         question = self._server.next_question()
@@ -129,6 +140,9 @@ class QuestionsScreen(ctk.CTkFrame):
         # adjust UI
         self._waiting_box.grid_forget()
         self._questions_box.grid(row=0, column=0, sticky="nsew")
+        self._next_question_btn.configure(
+            command=lambda: self._synchronize(self._show_leaderboard())
+        )
 
         self._question_title.configure(text=question["question"])
 
@@ -201,7 +215,20 @@ class QuestionsScreen(ctk.CTkFrame):
         await CLIENTS.ask_question(question)
         await CLIENTS.question_done()
         await CLIENTS.send_statistics()
-        await self._new_question()
+        # await self._new_question()
+
+    async def _show_leaderboard(self) -> None:
+        """
+        shows the correct answer to the question
+        """
+        self._next_question_btn.configure(
+            command=lambda: self._synchronize(self._new_question())
+        )
+        self._next_question_btn.grid(
+            row=0,
+            column=1,
+            padx=100
+        )
 
     def _update_animation(self) -> None:
         """

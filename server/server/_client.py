@@ -113,7 +113,7 @@ class Clients:
         for answer in self._answered:
             futures.append(answer["client"].send_client({
                 "type": "result",
-                "result_to": answer["question"]["id"],
+                "result_to": answer["id"],
                 "answer": answer["result"]
             }))
 
@@ -171,6 +171,7 @@ class Clients:
 
         self._answered.append({
             "question": question,
+            "id": qid,
             "client": question["client"],
             "points": points,
             "result": answered
