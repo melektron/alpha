@@ -316,9 +316,24 @@ watchEffect(async () => {
                         </div>
                     </template>
                 </Card>
-                <div v-if="show_multi_question">
-                    multi q
-                </div>
+                <Card v-if="show_multi_question">
+                    <template #content>
+                        <div class="text-question-wrapper">
+                            <div class="border-circle bg-primary inline-flex justify-content-center align-items-center h-6rem w-6rem -mt-8">
+                                <i class="pi pi-questionmark text-5xl"></i>
+                            </div>
+                            <h1>
+                                {{ game.current_question.text }}
+                            </h1>
+                            <Button
+                                v-for="(item, index) in game.current_question.choices"
+                                type="submit" 
+                                :label="item"
+                                @click="game.answerQuestion(index)"
+                            />
+                        </div>
+                    </template>
+                </Card>
                 <Card v-if="show_awaiting_results_card">
                     <template #content>
                         <div class="result-wrapper">
