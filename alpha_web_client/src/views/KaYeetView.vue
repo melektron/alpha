@@ -277,7 +277,7 @@ watchEffect(async () => {
                 <Card v-if="show_text_question">
                     <template #content>
                         <form @submit.prevent="submitTextAnswer" class="text-question-wrapper">
-                            <div v-if="game.current_question.result === 'unknown'" class="border-circle bg-primary inline-flex justify-content-center align-items-center h-6rem w-6rem -mt-8">
+                            <div class="border-circle bg-primary inline-flex justify-content-center align-items-center h-6rem w-6rem -mt-8">
                                 <i class="pi pi-questionmark text-5xl"></i>
                             </div>
                             <h1>
@@ -294,9 +294,28 @@ watchEffect(async () => {
                         </form>
                     </template>
                 </Card>
-                <div v-if="show_yes_no_question">
-                    yesno question
-                </div>
+                <Card v-if="show_yes_no_question">
+                    <template #content>
+                        <div class="text-question-wrapper">
+                            <div class="border-circle bg-primary inline-flex justify-content-center align-items-center h-6rem w-6rem -mt-8">
+                                <i class="pi pi-questionmark text-5xl"></i>
+                            </div>
+                            <h1>
+                                {{ game.current_question.text }}
+                            </h1>
+                            <Button 
+                                type="submit" 
+                                label="Yes"
+                                @click="game.answerQuestion(true)"
+                            />
+                            <Button 
+                                type="submit" 
+                                label="No"
+                                @click="game.answerQuestion(false)"
+                            />
+                        </div>
+                    </template>
+                </Card>
                 <div v-if="show_multi_question">
                     multi q
                 </div>

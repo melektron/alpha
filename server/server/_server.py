@@ -156,6 +156,7 @@ class Server:
                     await CLIENTS.ask_question(question)
                     await CLIENTS.question_done()
                     await CLIENTS.send_statistics()
+                    await asyncio.sleep(2)
 
         except Exception as e:
             ic(e)
