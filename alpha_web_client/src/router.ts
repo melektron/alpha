@@ -15,7 +15,7 @@ const router = createRouter({
         {
             name: 'index',
             path: '/',
-            redirect: { name: 'home' }
+            redirect: { name: 'kayeet' }
         },
         {
             name: 'home',
