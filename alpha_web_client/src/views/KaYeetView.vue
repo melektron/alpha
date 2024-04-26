@@ -17,6 +17,7 @@ import { nextTick } from 'vue';
 import { AwaitableEvent } from "@/utils/awaitable_event"
 import { any } from 'zod';
 import logo from '@/assets/kayeet_logo.png'
+import { QuestionType } from '@/stores/kayeet_messages';
 
 const game = useKaYeetGame();
 // old game state to detect changes
@@ -44,10 +45,13 @@ watchEffect(() => console.log("show_logged_in_text", show_logged_in_text.value))
 // event awaiters
 const setup_elements_left = new AwaitableEvent<Element>();
 const questioning_elements_left = new AwaitableEvent<Element>();
+const any_base_element_left = new AwaitableEvent<Element>();
+
 const connect_card_left = new AwaitableEvent<Element>();
 const login_card_left = new AwaitableEvent<Element>();
 const logged_in_text_left  = new AwaitableEvent<Element>();
 const ranking_card_left = new AwaitableEvent<Element>();
+
 
 // connect form state
 const host_entry = ref<string>("");
@@ -79,7 +83,15 @@ function loginButtonHandler(payload: Event) {
 
 // disconnected modal
 function disconnectModelAcknowledge(e: Event) {
+    show_disconnected_dialog.value = false;
     game.acknowledgeError();
+}
+
+// question computed
+const answer_text = ref<string>("");
+function submitTextAnswer(e: Event) {
+    game.answerQuestion(answer_text.value);
+    answer_text.value = "";
 }
 
 watchEffect(async () => {
@@ -91,9 +103,24 @@ watchEffect(async () => {
             // otherwise this would cause unwanted side effects
             if (previous_game_state !== GameStates.DISCONNECTED)
                 break;
+            if (show_setup_elements.value === true || show_questioning_elements.value === true) {
+                show_setup_elements.value = false;
+                show_questioning_elements.value = false;
+                await any_base_element_left.next;
+            }
+            // everything off
+            show_connect_card.value = true;
             show_login_card.value = false;
             show_disconnected_dialog.value = false;
-            await login_card_left.next;
+            show_logged_in_text.value = false;
+            show_text_question.value = false;
+            show_yes_no_question.value = false;
+            show_multi_question.value = false;
+            show_awaiting_results_card.value = false;
+            show_results_card.value = false;
+            show_ranking_card.value = false;
+            // show setup and connect
+            show_setup_elements.value = true;
             show_connect_card.value = true;
             break;
         
@@ -130,6 +157,9 @@ watchEffect(async () => {
             } else if (previous_game_state === GameStates.DISPLAYING_SCORES) {
                 show_ranking_card.value = false;
                 // TODO: maybe add transition
+            } else if (previous_game_state === GameStates.DISPLAYING_RESULT) {
+                show_results_card.value = false;
+                // TODO: maybe transition
             }
             if (game.state === GameStates.QUESTION_TEXT) {
                 show_text_question.value = true;
@@ -182,7 +212,7 @@ watchEffect(async () => {
 
 <template>
     <main>
-        <Transition name="fade-inout" @after-leave="(e) => setup_elements_left.happened(e)">
+        <Transition name="fade-inout" @after-leave="(e) => {setup_elements_left.happened(e); any_base_element_left.happened(e);}">
             <div v-if="show_setup_elements" class="centering-wrapper">
                 <div class="kayeet-head-wrapper">
                     <img :src="logo">
@@ -240,45 +270,107 @@ watchEffect(async () => {
                         </div>
                     </Transition>
                 </div>
-
-                <Dialog v-model:visible="show_disconnected_dialog" modal :style="{ width: '18rem' }">
-                    <template #container="{ closeCallback }">
-                        <div class="flex flex-column align-items-center p-5 surface-overlay border-round">
-                            <div class="border-circle bg-yellow-500 inline-flex justify-content-center align-items-center h-6rem w-6rem -mt-8">
-                                <i class="pi pi-exclamation-triangle text-5xl"></i>
-                            </div>
-                            <span class="font-bold text-2xl block mb-2 mt-4">Connection lost</span>
-                            <p class="mb-0">You have been disconnected from the game server.</p>
-                            <div class="flex align-items-center gap-2 mt-4">
-                                <Button label="Go back to start" @click="disconnectModelAcknowledge"></Button>
-                            </div>
-                        </div>
-                    </template>
-                </Dialog>
             </div>
         </Transition>
-        <Transition name="fade-inout" @after-leave="(e) => questioning_elements_left.happened(e)">
+        <Transition name="fade-inout" @after-leave="(e) => {questioning_elements_left.happened(e); any_base_element_left.happened(e);}">
             <div v-if="show_questioning_elements" class="centering-wrapper">
-                <div v-if="show_text_question">
-                    questino text
-                </div>
+                <Card v-if="show_text_question">
+                    <template #content>
+                        <form @submit.prevent="submitTextAnswer" class="text-question-wrapper">
+                            <div v-if="game.current_question.result === 'unknown'" class="border-circle bg-primary inline-flex justify-content-center align-items-center h-6rem w-6rem -mt-8">
+                                <i class="pi pi-questionmark text-5xl"></i>
+                            </div>
+                            <h1>
+                                {{ game.current_question.text }}
+                            </h1>
+                            <FloatLabel>
+                                <InputText id="host" v-model="answer_text" :style="{width: '100%'}" />
+                                <label for="host">Your Answer</label>
+                            </FloatLabel>
+                            <Button 
+                                type="submit" 
+                                label="Submit"
+                            />
+                        </form>
+                    </template>
+                </Card>
                 <div v-if="show_yes_no_question">
                     yesno question
                 </div>
                 <div v-if="show_multi_question">
                     multi q
                 </div>
-                <div v-if="show_awaiting_results_card">
-                    awaiting results
-                </div>
-                <div v-if="show_results_card">
-                    results
-                </div>
-                <div v-if="show_ranking_card">
-                    ranking
-                </div>
+                <Card v-if="show_awaiting_results_card">
+                    <template #content>
+                        <div class="result-wrapper">
+                            <div class="border-circle bg-primary inline-flex justify-content-center align-items-center h-6rem w-6rem -mt-8">
+                                <i class="pi pi-spinner-dotted pi-spin text-5xl"></i>
+                            </div>
+                            <h1>
+                                The next Einstein? Or just an average HTL Student?
+                            </h1>
+                        </div>
+                    </template>
+                </Card>
+                <Card v-if="show_results_card">
+                    <template #content>
+                        <div class="result-wrapper">
+                            <div v-if="game.current_question.result === 'wrong'" class="border-circle bg-red-500 inline-flex justify-content-center align-items-center h-6rem w-6rem -mt-8">
+                                <i class="pi pi-times text-5xl"></i>
+                            </div>
+                            <div v-if="game.current_question.result === 'timeout'" class="border-circle bg-yellow-500 inline-flex justify-content-center align-items-center h-6rem w-6rem -mt-8">
+                                <i class="pi pi-clock text-5xl"></i>
+                            </div>
+                            <div v-if="game.current_question.result === 'correct'" class="border-circle bg-green-500 inline-flex justify-content-center align-items-center h-6rem w-6rem -mt-8">
+                                <i class="pi pi-check text-5xl"></i>
+                            </div>
+                            <div v-if="game.current_question.result === 'unknown'" class="border-circle bg-yellow-500 inline-flex justify-content-center align-items-center h-6rem w-6rem -mt-8">
+                                <i class="pi pi-exclamation-triangle text-5xl"></i>
+                            </div>
+                            <h1 v-if="game.current_question.result === 'wrong'">
+                                Oh no, that wasn't right...
+                            </h1>
+                            <h1 v-if="game.current_question.result === 'correct'">
+                                Congrat's, you are correct!
+                            </h1>
+                            <h1 v-if="game.current_question.result === 'timeout'">
+                                You took too long, speed up!
+                            </h1>
+                            <h1 v-if="game.current_question.result === 'unknown'">
+                                Something went wrong internally...
+                            </h1>
+                            <Button 
+                                label="View Ranking" 
+                                icon="pi pi-arrow-right" 
+                                icon-pos="left"
+                                @click="game.showRanking()"
+                            />
+                        </div>
+                    </template>
+                </Card>
+                <Card v-if="show_ranking_card">
+                    <template #content>
+                        <div class="ranking-wrapper">
+                            Ranking Yayyy!!
+                        </div>
+                    </template>
+                </Card>
             </div>
         </Transition>
+        <Dialog v-model:visible="show_disconnected_dialog" modal :style="{ width: '18rem' }">
+            <template #container="{ closeCallback }">
+                <div class="flex flex-column align-items-center p-5 surface-overlay border-round">
+                    <div class="border-circle bg-yellow-500 inline-flex justify-content-center align-items-center h-6rem w-6rem -mt-8">
+                        <i class="pi pi-exclamation-triangle text-5xl"></i>
+                    </div>
+                    <span class="font-bold text-2xl block mb-2 mt-4">Connection lost</span>
+                    <p class="mb-0">You have been disconnected from the game server.</p>
+                    <div class="flex align-items-center gap-2 mt-4">
+                        <Button label="Go back to start" @click="disconnectModelAcknowledge"></Button>
+                    </div>
+                </div>
+            </template>
+        </Dialog>
     </main>
 </template>
 
@@ -329,6 +421,33 @@ h1.logged-in-text {
 }
 .logged-in-text {
     text-align: center;
+}
+
+.result-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: 20rem;
+}
+
+.result-wrapper h1 {
+    text-align: center;
+}
+
+.result-wrapper button {
+    width: 12rem;
+}
+
+.text-question-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 40rem;
+}
+
+.text-question-wrapper > * {
+    width: 100%;
 }
 
 

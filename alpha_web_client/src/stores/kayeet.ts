@@ -10,7 +10,7 @@ Manages the kayeet game state
 import { ref, computed, reactive } from "vue";
 import { defineStore } from "pinia";
 import { t, StateMachine } from "@/utils/reactive_fsm";
-import { ErrorCode, QuestionType, incoming_message, login_message, question_message, text_question_message, type IncomingMessage, type LoginMessage, type QuestionMessage } from "./kayeet_messages";
+import { ErrorCode, QuestionType, incoming_message, login_message, question_message, text_question_message, type AnswerMessage, type IncomingMessage, type LoginMessage, type QuestionMessage } from "./kayeet_messages";
 
 
 // possible library to help with this? https://github.com/eram/typescript-fsm
@@ -49,7 +49,7 @@ export enum GameEvents {
     SUBMIT_ANSWER = "SUBMIT_ANSWER",
     ANSWER_TIMEOUT = "ANSWER_TIMEOUT",
     RESULT_RECEIVED = "RESULT_RECEIVED",
-    STATS_RECEIVED = "STATS_RECEIVED",
+    SHOW_STATS = "STATS_RECEIVED",
 
     DISCONNECTED = "DISOCNNECTED",
     UNCONDITIONAL_RESET = "UNCONDITIONAL_RESET"
@@ -81,10 +81,14 @@ export const useKaYeetGame = defineStore("kayeet", () => {
         t(GameStates.LOGGED_IN,         GameEvents.RECEIVED_TEXT_Q,     GameStates.QUESTION_TEXT,       undefined),
         t(GameStates.LOGGED_IN,         GameEvents.RECEIVED_YES_NO_Q,   GameStates.QUESTION_YES_NO,     undefined),
         t(GameStates.LOGGED_IN,         GameEvents.RECEIVED_MULTI_Q,    GameStates.QUESTION_MULTI,      undefined),
-        // enter question after displaying scores
+        // enter question after displaying scores or results if scores are not shown yet
         t(GameStates.DISPLAYING_SCORES, GameEvents.RECEIVED_TEXT_Q,     GameStates.QUESTION_TEXT,       undefined),
         t(GameStates.DISPLAYING_SCORES, GameEvents.RECEIVED_YES_NO_Q,   GameStates.QUESTION_YES_NO,     undefined),
         t(GameStates.DISPLAYING_SCORES, GameEvents.RECEIVED_MULTI_Q,    GameStates.QUESTION_MULTI,      undefined),
+        t(GameStates.DISPLAYING_RESULT, GameEvents.RECEIVED_TEXT_Q,     GameStates.QUESTION_TEXT,       undefined),
+        t(GameStates.DISPLAYING_RESULT, GameEvents.RECEIVED_YES_NO_Q,   GameStates.QUESTION_YES_NO,     undefined),
+        t(GameStates.DISPLAYING_RESULT, GameEvents.RECEIVED_MULTI_Q,    GameStates.QUESTION_MULTI,      undefined),
+        // TODO: add the otehr three ones
         // continue from question when submitting an answer
         t(GameStates.QUESTION_TEXT,     GameEvents.SUBMIT_ANSWER,       GameStates.AWAITING_RESULT,     undefined),
         t(GameStates.QUESTION_YES_NO,   GameEvents.SUBMIT_ANSWER,       GameStates.AWAITING_RESULT,     undefined),
@@ -98,7 +102,7 @@ export const useKaYeetGame = defineStore("kayeet", () => {
         // we might get a timeout after submitting a question if a race condition occurs due to network delays. This accounts for that.
         t(GameStates.AWAITING_RESULT,   GameEvents.ANSWER_TIMEOUT,      GameStates.DISPLAYING_RESULT,   undefined),
         // after the own results are displayed, show the leader board
-        t(GameStates.DISPLAYING_RESULT, GameEvents.STATS_RECEIVED,      GameStates.DISPLAYING_SCORES,   undefined),
+        t(GameStates.DISPLAYING_RESULT, GameEvents.SHOW_STATS,      GameStates.DISPLAYING_SCORES,   undefined),
         
         // disconnects that go to disconnected state (to show it a general disconnect message) can happen during any of the fully connected states
         t(GameStates.READY_TO_LOG_IN,   GameEvents.DISCONNECTED,        GameStates.DISCONNECTED,        undefined),
@@ -137,13 +141,17 @@ export const useKaYeetGame = defineStore("kayeet", () => {
         choices: string[],
         id: number,
         result: "unknown" | "correct" | "wrong" | "timeout",
+        type: QuestionType
     }
     const current_question = reactive<CurrentQuestion>({
         text: "",
         choices: [],
         id: 0,
         result: "unknown",
+        type: QuestionType.TextQuestion
     });
+    type Ranking = [number, string][];
+    const ranking = ref<Ranking>([]);
 
     /*
      * WebSocket callbacks 
@@ -172,6 +180,7 @@ export const useKaYeetGame = defineStore("kayeet", () => {
                             break;
                         
                         case ErrorCode.QuestionTimeout:
+                            current_question.result = "timeout";
                             machine.dispatchIfPossible(GameEvents.ANSWER_TIMEOUT);
                             break;
                     
@@ -184,6 +193,8 @@ export const useKaYeetGame = defineStore("kayeet", () => {
                     msg = question_message.parse(msg);
                     current_question.text = msg.question;
                     current_question.id = msg.id;
+                    current_question.result = "unknown";
+                    current_question.type = msg.question_type;
                     if (msg.question_type === QuestionType.TextQuestion) {
                         machine.dispatch(GameEvents.RECEIVED_TEXT_Q);
                     } else if (msg.question_type === QuestionType.YesNoQuestion) {
@@ -192,6 +203,15 @@ export const useKaYeetGame = defineStore("kayeet", () => {
                         current_question.choices = msg.choices;
                         machine.dispatch(GameEvents.RECEIVED_MULTI_Q);
                     }
+                    break;
+                
+                case "result":
+                    current_question.result = msg.result ? "correct" : "wrong";
+                    machine.dispatch(GameEvents.RESULT_RECEIVED);
+                    break;
+                
+                case "stats":
+                    ranking.value = msg.ranking;
                     break;
             
                 default:
@@ -315,15 +335,33 @@ export const useKaYeetGame = defineStore("kayeet", () => {
         machine.dispatch(GameEvents.ATTEMPT_LOGIN, username);
     }
 
+    function showRanking() {
+        machine.dispatchIfPossible(GameEvents.SHOW_STATS);
+    }
+
     function acknowledgeError() {
         machine.dispatch(GameEvents.ACK_ERROR);
     }
 
+    function answerQuestion(answer: string | boolean | number) {
+        let msg: AnswerMessage = {
+            answer_to: current_question.id,
+            answer: answer,
+            type: "answer",
+        };
+        sendMessage(msg);
+        machine.dispatchIfPossible(GameEvents.SUBMIT_ANSWER);
+    }
+
     return {
+        current_question,
+        ranking,
         reset,
         state: computed(() => machine.state),
         connectToGameServer,
         login,
         acknowledgeError,
+        answerQuestion,
+        showRanking,
     };
 })

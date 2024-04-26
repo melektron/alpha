@@ -3,7 +3,7 @@
 
 type Waiter<ET> = (value: ET | PromiseLike<ET>) => void
 
-export class AwaitableEvent<ET> {
+export class AwaitableEvent<ET = undefined> {
     protected waiters: Waiter<ET>[]
 
     constructor() {

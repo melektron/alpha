@@ -83,10 +83,34 @@ export const any_question_message = z.object({
 });
 export type AnyQuestionMessage = z.infer<typeof any_question_message>;
 
+export const answer_message = z.object({
+    type: z.literal("answer"),
+    answer_to: z.number(),
+    answer: z.union([z.string(), z.number(), z.boolean()]),
+});
+export type AnswerMessage = z.infer<typeof answer_message>;
+
+export const result_message = z.object({
+    type: z.literal("result"),
+    result_to: z.number(),
+    result: z.boolean(),
+});
+export type ResultMessage = z.infer<typeof result_message>;
+
+export const stats_message = z.object({
+    type: z.literal("stats"),
+    ranking: z.array(
+        z.tuple([z.number(), z.string()])
+    ),
+});
+export type StatsMessage = z.infer<typeof stats_message>;
+
 export const incoming_message = z.discriminatedUnion("type", [
     login_confirm_message,
     error_message,
     any_question_message,
+    result_message,
+    stats_message,
 ]);
 export type IncomingMessage = z.infer<typeof incoming_message>;
 
