@@ -9,7 +9,7 @@ Main application entry point
 
 import './assets/main.css';
 //import 'primevue/resources/themes/lara-dark-cyan/theme.css'
-import 'primevue/resources/themes/aura-light-lime/theme.css'
+import 'primevue/resources/themes/aura-dark-lime/theme.css'
 import 'primeflex/primeflex.css'
 
 import { createApp } from 'vue';
@@ -39,6 +39,8 @@ import FloatLabel from 'primevue/floatlabel';
 import Message from 'primevue/message';
 import Dialog from 'primevue/dialog';
 import Image from 'primevue/image';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
 
 const app = createApp(App);
 
@@ -66,6 +68,8 @@ app.component('FloatLabel', FloatLabel);
 app.component('Message', Message);
 app.component('Dialog', Dialog);
 app.component('Image', Image);
+app.component('DataTable', DataTable);
+app.component('Column', Column);
 
 
 app.mount('#app');

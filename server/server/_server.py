@@ -156,7 +156,7 @@ class Server:
                     await CLIENTS.ask_question(question)
                     await CLIENTS.question_done()
                     await CLIENTS.send_statistics()
-                    await asyncio.sleep(2)
+                    await aioconsole.ainput('Press enter for next question...')
 
         except Exception as e:
             ic(e)

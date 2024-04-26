@@ -115,7 +115,7 @@
     {
       "question": "Which planet is known as the \"Red Planet\"?",
       "choices": ["Venus", "Mars", "Jupiter", "Saturn"],
-      "valid": [2]
+      "valid": [1]
     },
     {
       "question": "What is the tallest mountain in the world?",
@@ -130,7 +130,7 @@
     {
       "question": "What is the chemical formula for water?",
       "choices": ["H2O2", "CO2", "H2O", "O2"],
-      "valid": [3]
+      "valid": [2]
     },
     {
       "question": "In which year did the Titanic sink?",

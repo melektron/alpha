@@ -37,10 +37,10 @@ const show_awaiting_results_card = ref<boolean>(false);
 const show_results_card = ref<boolean>(false);
 const show_ranking_card = ref<boolean>(false);
 
-watchEffect(() => console.log("show_connect_card", show_connect_card.value));
-watchEffect(() => console.log("show_login_card", show_login_card.value));
-watchEffect(() => console.log("show_disconnected_dialog", show_disconnected_dialog.value));
-watchEffect(() => console.log("show_logged_in_text", show_logged_in_text.value));
+//watchEffect(() => console.log("show_connect_card", show_connect_card.value));
+//watchEffect(() => console.log("show_login_card", show_login_card.value));
+//watchEffect(() => console.log("show_disconnected_dialog", show_disconnected_dialog.value));
+//watchEffect(() => console.log("show_logged_in_text", show_logged_in_text.value));
 
 // event awaiters
 const setup_elements_left = new AwaitableEvent<Element>();
@@ -61,14 +61,14 @@ const connect_button_label = computed(() => {
     else if (game.state === GameStates.CONNECTING)
         return "Connecting ...";
     return "N/A";
-})
+});
 const connect_button_icon = computed(() => {
     if (game.state === GameStates.CONNECTING)
         return "pi pi-spin pi-spinner-dotted";
     else if (game.state === GameStates.CONNECTION_FAILED)
         return "pi pi-times";
     return "";
-})
+});
 const show_conn_failed_message = ref<boolean>(false);
 const conn_failed_life_end = () => setTimeout(() => show_conn_failed_message.value = false, 1000);
 function connectToGame(payload: Event) {
@@ -87,12 +87,20 @@ function disconnectModelAcknowledge(e: Event) {
     game.acknowledgeError();
 }
 
-// question computed
+// question data
 const answer_text = ref<string>("");
 function submitTextAnswer(e: Event) {
     game.answerQuestion(answer_text.value);
     answer_text.value = "";
 }
+
+// ranking data
+const ranking_formatted = computed(() => {
+    return game.ranking.map((el) => {return {
+        player: el[1], 
+        score: el[0]
+    }});
+});
 
 watchEffect(async () => {
     console.log(`Game state changed from ${GameStates[previous_game_state]} to ${GameStates[game.state]}`);
@@ -163,6 +171,8 @@ watchEffect(async () => {
             }
             if (game.state === GameStates.QUESTION_TEXT) {
                 show_text_question.value = true;
+                // reset question value
+                answer_text.value = "";
             } else if (game.state === GameStates.QUESTION_YES_NO) {
                 show_yes_no_question.value = true;
             } else if (game.state === GameStates.QUESTION_MULTI) {
@@ -276,9 +286,9 @@ watchEffect(async () => {
             <div v-if="show_questioning_elements" class="centering-wrapper">
                 <Card v-if="show_text_question">
                     <template #content>
-                        <form @submit.prevent="submitTextAnswer" class="text-question-wrapper">
+                        <form @submit.prevent="submitTextAnswer" class="question-form">
                             <div class="border-circle bg-primary inline-flex justify-content-center align-items-center h-6rem w-6rem -mt-8">
-                                <i class="pi pi-questionmark text-5xl"></i>
+                                <i class="pi pi-question text-5xl"></i>
                             </div>
                             <h1>
                                 {{ game.current_question.text }}
@@ -296,9 +306,9 @@ watchEffect(async () => {
                 </Card>
                 <Card v-if="show_yes_no_question">
                     <template #content>
-                        <div class="text-question-wrapper">
+                        <div class="question-form">
                             <div class="border-circle bg-primary inline-flex justify-content-center align-items-center h-6rem w-6rem -mt-8">
-                                <i class="pi pi-questionmark text-5xl"></i>
+                                <i class="pi pi-question text-5xl"></i>
                             </div>
                             <h1>
                                 {{ game.current_question.text }}
@@ -318,9 +328,9 @@ watchEffect(async () => {
                 </Card>
                 <Card v-if="show_multi_question">
                     <template #content>
-                        <div class="text-question-wrapper">
+                        <div class="question-form">
                             <div class="border-circle bg-primary inline-flex justify-content-center align-items-center h-6rem w-6rem -mt-8">
-                                <i class="pi pi-questionmark text-5xl"></i>
+                                <i class="pi pi-question text-5xl"></i>
                             </div>
                             <h1>
                                 {{ game.current_question.text }}
@@ -371,7 +381,10 @@ watchEffect(async () => {
                                 You took too long, speed up!
                             </h1>
                             <h1 v-if="game.current_question.result === 'unknown'">
-                                Something went wrong internally...
+                                Something went wrong internally...<br>
+                                Impossible Error, can't occur!<br>
+                                ...<br>
+                                Wait whaa.. How?!?
                             </h1>
                             <Button 
                                 label="View Ranking" 
@@ -384,13 +397,23 @@ watchEffect(async () => {
                 </Card>
                 <Card v-if="show_ranking_card">
                     <template #content>
-                        <div class="ranking-wrapper">
-                            Ranking Yayyy!!
+                        <div class="result-wrapper">
+                            <div class="border-circle bg-primary inline-flex justify-content-center align-items-center h-6rem w-6rem -mt-8">
+                                <i class="pi pi-star text-5xl"></i>
+                            </div>
+                            <h1>
+                                Ranking
+                            </h1>
+                            <DataTable :value="ranking_formatted" class="ranking-table">
+                                <Column field="player" header="Player"></Column>
+                                <Column field="score" header="Score"></Column>
+                            </DataTable>
                         </div>
                     </template>
                 </Card>
             </div>
         </Transition>
+
         <Dialog v-model:visible="show_disconnected_dialog" modal :style="{ width: '18rem' }">
             <template #container="{ closeCallback }">
                 <div class="flex flex-column align-items-center p-5 surface-overlay border-round">
@@ -457,6 +480,18 @@ h1.logged-in-text {
     text-align: center;
 }
 
+.question-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: 40rem;
+}
+
+.question-form > * {
+    width: 100%;
+}
+
 .result-wrapper {
     display: flex;
     flex-direction: column;
@@ -473,17 +508,9 @@ h1.logged-in-text {
     width: 12rem;
 }
 
-.text-question-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    width: 40rem;
-}
-
-.text-question-wrapper > * {
+.ranking-table {
     width: 100%;
 }
-
 
 .fade-inout-enter-active,
 .fade-inout-leave-active {

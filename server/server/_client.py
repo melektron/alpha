@@ -34,7 +34,7 @@ class Clients:
         self._qid = 0
         self._unanswered = {}
         self._answered = []
-        self._question_time = 5
+        self._question_time = 15
         self._current_timeout = ...
 
     def check_username(self, username: str) -> bool:
