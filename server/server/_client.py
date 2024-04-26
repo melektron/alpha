@@ -106,7 +106,7 @@ class Clients:
         for question in self._unanswered.values():
             futures.append(question["client"].send_client({
                 "type": "error",
-                "error_type": 4 # QuestionTimeout
+                "error_type": 4  # QuestionTimeout
             }))
 
         # send results to all clients who answered
@@ -114,7 +114,7 @@ class Clients:
             futures.append(answer["client"].send_client({
                 "type": "result",
                 "result_to": answer["id"],
-                "answer": answer["result"]
+                "result": answer["result"]
             }))
 
         self._unanswered.clear()
@@ -183,7 +183,7 @@ class Clients:
         update all clients about the current rankings
         """
         ranking = [(c.score, c.username) for c in self._clients]
-        ranking = sorted(ranking, key=lambda _: _[1], reverse=True)
+        ranking = sorted(ranking, key=lambda _: _[0], reverse=True)
 
         await self.send_all({
             "type": "stats",
