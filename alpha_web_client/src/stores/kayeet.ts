@@ -7,10 +7,10 @@ www.elektron.work
 Manages the kayeet game state
 */
 
-import { ref, computed } from "vue";
+import { ref, computed, reactive } from "vue";
 import { defineStore } from "pinia";
 import { t, StateMachine } from "@/utils/reactive_fsm";
-import { ErrorCode, kayeet_message, login_message, type KayeetMessage, type LoginMessage } from "./kayeet_messages";
+import { ErrorCode, QuestionType, incoming_message, login_message, question_message, text_question_message, type IncomingMessage, type LoginMessage, type QuestionMessage } from "./kayeet_messages";
 
 
 // possible library to help with this? https://github.com/eram/typescript-fsm
@@ -132,6 +132,19 @@ export const useKaYeetGame = defineStore("kayeet", () => {
     // state machine representing the game's state
     const machine = new StateMachine(GameStates.READY_TO_CONNECT, transitions);
 
+    interface CurrentQuestion {
+        text: string,
+        choices: string[],
+        id: number,
+        result: "unknown" | "correct" | "wrong" | "timeout",
+    }
+    const current_question = reactive<CurrentQuestion>({
+        text: "",
+        choices: [],
+        id: 0,
+        result: "unknown",
+    });
+
     /*
      * WebSocket callbacks 
      */
@@ -142,38 +155,53 @@ export const useKaYeetGame = defineStore("kayeet", () => {
     function _onMessage(this: WebSocket, e: MessageEvent) {
         console.log("Got message:", e.data)
 
-        let msg: KayeetMessage
+        let msg;
         try {
             const data_obj = JSON.parse(e.data);
-            msg = kayeet_message.parse(data_obj);
+            msg = incoming_message.parse(data_obj);
+            switch (msg.type) {
+                case "confirm":
+                    machine.dispatch(GameEvents.LOGIN_ACK_RECEIVED)
+                    break;
+                
+                case "error":
+                    console.log(`Received API error: ${ErrorCode[msg.error_type]}, cause: "${msg.cause ?? ""}"`)
+                    switch (msg.error_type) {
+                        case ErrorCode.InvalidLogin:
+                            machine.dispatch(GameEvents.LOGIN_NAK_RECEIVED);
+                            break;
+                        
+                        case ErrorCode.QuestionTimeout:
+                            machine.dispatchIfPossible(GameEvents.ANSWER_TIMEOUT);
+                            break;
+                    
+                        default:
+                            break;
+                    }
+                    break;
+                
+                case "question":
+                    msg = question_message.parse(msg);
+                    current_question.text = msg.question;
+                    current_question.id = msg.id;
+                    if (msg.question_type === QuestionType.TextQuestion) {
+                        machine.dispatch(GameEvents.RECEIVED_TEXT_Q);
+                    } else if (msg.question_type === QuestionType.YesNoQuestion) {
+                        machine.dispatch(GameEvents.RECEIVED_YES_NO_Q);
+                    } else if (msg.question_type === QuestionType.MultiQuestion) {
+                        current_question.choices = msg.choices;
+                        machine.dispatch(GameEvents.RECEIVED_MULTI_Q);
+                    }
+                    break;
+            
+                default:
+                    break;
+            }
         } catch (error) {
             console.error("Error parsing kayeet message (ignored):", error);
             return;
         }
-        switch (msg.type) {
-            case "confirm":
-                machine.dispatch(GameEvents.LOGIN_ACK_RECEIVED)
-                break;
-            
-            case "error":
-                console.log(`Received API error: ${ErrorCode[msg.error_type]}, cause: "${msg.cause ?? ""}"`)
-                switch (msg.error_type) {
-                    case ErrorCode.InvalidLogin:
-                        machine.dispatch(GameEvents.LOGIN_NAK_RECEIVED);
-                        break;
-                    
-                    case ErrorCode.QuestionTimeout:
-                        //machine.dispatchIfPossible();
-                        break;
-                
-                    default:
-                        break;
-                }
-                break;
         
-            default:
-                break;
-        }
         
     }
     function _onError(this: WebSocket, e: Event) {

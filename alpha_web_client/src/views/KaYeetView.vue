@@ -22,11 +22,19 @@ const game = useKaYeetGame();
 // old game state to detect changes
 let previous_game_state = game.state;
 
-// stage form visibility flags
+// element visibility flags
+const show_setup_elements = ref<boolean>(true);
+const show_questioning_elements = ref<boolean>(false);
 const show_connect_card = ref<boolean>(true);
 const show_login_card = ref<boolean>(false);
 const show_disconnected_dialog = ref<boolean>(false);
 const show_logged_in_text = ref<boolean>(false);
+const show_text_question = ref<boolean>(false);
+const show_yes_no_question  = ref<boolean>(false);
+const show_multi_question = ref<boolean>(false);
+const show_awaiting_results_card = ref<boolean>(false);
+const show_results_card = ref<boolean>(false);
+const show_ranking_card = ref<boolean>(false);
 
 watchEffect(() => console.log("show_connect_card", show_connect_card.value));
 watchEffect(() => console.log("show_login_card", show_login_card.value));
@@ -34,9 +42,12 @@ watchEffect(() => console.log("show_disconnected_dialog", show_disconnected_dial
 watchEffect(() => console.log("show_logged_in_text", show_logged_in_text.value));
 
 // event awaiters
+const setup_elements_left = new AwaitableEvent<Element>();
+const questioning_elements_left = new AwaitableEvent<Element>();
 const connect_card_left = new AwaitableEvent<Element>();
 const login_card_left = new AwaitableEvent<Element>();
 const logged_in_text_left  = new AwaitableEvent<Element>();
+const ranking_card_left = new AwaitableEvent<Element>();
 
 // connect form state
 const host_entry = ref<string>("");
@@ -73,7 +84,6 @@ function disconnectModelAcknowledge(e: Event) {
 
 watchEffect(async () => {
     console.log(`Game state changed from ${GameStates[previous_game_state]} to ${GameStates[game.state]}`);
-    previous_game_state = game.state;
 
     switch (game.state) {
         case GameStates.READY_TO_CONNECT:
@@ -106,11 +116,65 @@ watchEffect(async () => {
         case GameStates.DISCONNECTED:
             show_disconnected_dialog.value = true;
             break;
+        
+        case GameStates.QUESTION_TEXT:
+        case GameStates.QUESTION_YES_NO:
+        case GameStates.QUESTION_MULTI:
+            // when transitioning from logged in state
+            if (previous_game_state === GameStates.LOGGED_IN) {
+                // transition from setup to questioning once
+                show_setup_elements.value = false;
+                await setup_elements_left.next;
+                show_logged_in_text.value = false;  // reset this for later, will not trigger any effect since element is not in dom
+                show_questioning_elements.value = true;
+            } else if (previous_game_state === GameStates.DISPLAYING_SCORES) {
+                show_ranking_card.value = false;
+                // TODO: maybe add transition
+            }
+            if (game.state === GameStates.QUESTION_TEXT) {
+                show_text_question.value = true;
+            } else if (game.state === GameStates.QUESTION_YES_NO) {
+                show_yes_no_question.value = true;
+            } else if (game.state === GameStates.QUESTION_MULTI) {
+                show_multi_question.value = true;
+            }
+            break;
+        
+        case GameStates.AWAITING_RESULT:
+            show_text_question.value = false;
+            show_yes_no_question.value = false;
+            show_multi_question.value = false;
+            // TODO: maybe add transition
+            show_awaiting_results_card.value = true;
+            break;
+        
+        case GameStates.DISPLAYING_RESULT:
+            if (previous_game_state === GameStates.AWAITING_RESULT) {
+                // after we have submitted
+                show_awaiting_results_card.value = false;
+                // TODO: probably an animation here since this is not time critical
+            } else if ([GameStates.QUESTION_TEXT, GameStates.QUESTION_YES_NO, GameStates.QUESTION_MULTI].includes(previous_game_state)) {
+                // if answer was not submitted in time
+                show_text_question.value = false;
+                show_yes_no_question.value = false;
+                show_multi_question.value = false;
+                // TODO: maybe also animate here?
+            }
+            show_results_card.value = true;
+            break;
+        
+        case GameStates.DISPLAYING_SCORES:
+            show_results_card.value = false;
+            // TODO: animate
+            show_ranking_card.value = true;
+            break;
     
         default:
             break;
     }
-})
+
+    previous_game_state = game.state;
+});
 
 
 </script>
@@ -118,79 +182,103 @@ watchEffect(async () => {
 
 <template>
     <main>
-        <div class="centering-wrapper">
-            <div class="kayeet-head-wrapper">
-                <img :src="logo">
-                <h1> KaYeet?! KaYeet!! </h1>
-            </div>
-            <div class="content-wrapper">
-                <Transition name="fade-inout" @after-leave="(e) => connect_card_left.happened(e)">
-                    <Card v-if="show_connect_card">
-                        <template #content>
-                            <form @submit.prevent="connectToGame" class="setup-form">
-                                <FloatLabel>
-                                    <InputText id="host" v-model="host_entry" placeholder="localhost" :style="{width: '100%'}" />
-                                    <label for="host">Game Server</label>
-                                </FloatLabel>
-                                <Button 
-                                    type="submit" 
-                                    :label="connect_button_label" 
-                                    :icon="connect_button_icon" 
-                                    icon-pos="right"
-                                />
-                                <Message 
-                                    v-if="show_conn_failed_message" 
-                                    severity="error" 
-                                    :sticky="false" 
-                                    :life="2000"
-                                    @close="show_conn_failed_message = false"
-                                    @life-end="conn_failed_life_end"
-                                >
-                                    Connection failed
-                                </Message>
+        <Transition name="fade-inout" @after-leave="(e) => setup_elements_left.happened(e)">
+            <div v-if="show_setup_elements" class="centering-wrapper">
+                <div class="kayeet-head-wrapper">
+                    <img :src="logo">
+                    <h1> KaYeet?! KaYeet!! </h1>
+                </div>
+                <div class="content-wrapper">
+                    <Transition name="fade-inout" @after-leave="(e) => connect_card_left.happened(e)">
+                        <Card v-if="show_connect_card">
+                            <template #content>
+                                <form @submit.prevent="connectToGame" class="setup-form">
+                                    <FloatLabel>
+                                        <InputText id="host" v-model="host_entry" placeholder="localhost" :style="{width: '100%'}" />
+                                        <label for="host">Game Server</label>
+                                    </FloatLabel>
+                                    <Button 
+                                        type="submit" 
+                                        :label="connect_button_label" 
+                                        :icon="connect_button_icon" 
+                                        icon-pos="right"
+                                    />
+                                    <Message 
+                                        v-if="show_conn_failed_message" 
+                                        severity="error" 
+                                        :sticky="false" 
+                                        :life="2000"
+                                        @close="show_conn_failed_message = false"
+                                        @life-end="conn_failed_life_end"
+                                    >
+                                        Connection failed
+                                    </Message>
 
-                            </form>
-                        </template>
-                    </Card>
-                </Transition>
+                                </form>
+                            </template>
+                        </Card>
+                    </Transition>
 
-                <Transition name="fade-inout" @after-leave="(e) => login_card_left.happened(e)">
-                    <Card v-if="show_login_card">
-                        <template #content>
-                            <form @submit.prevent="loginButtonHandler" class="setup-form">
-                                <FloatLabel>
-                                    <InputText id="host" v-model="username_entry" :style="{width: '100%'}" />
-                                    <label for="host">Username</label>
-                                </FloatLabel>
-                                <Button type="submit">Join Game</Button>
-                            </form>
-                        </template>
-                    </Card>
-                </Transition>
+                    <Transition name="fade-inout" @after-leave="(e) => login_card_left.happened(e)">
+                        <Card v-if="show_login_card">
+                            <template #content>
+                                <form @submit.prevent="loginButtonHandler" class="setup-form">
+                                    <FloatLabel>
+                                        <InputText id="host" v-model="username_entry" :style="{width: '100%'}" />
+                                        <label for="host">Username</label>
+                                    </FloatLabel>
+                                    <Button type="submit">Join Game</Button>
+                                </form>
+                            </template>
+                        </Card>
+                    </Transition>
 
-                <Transition name="fade-inout" @after-leave="(e) => logged_in_text_left.happened(e)">
-                    <div>
-                        <h1 v-if="show_logged_in_text" class="logged-in-text">You are logged in as <b>{{ username_entry }}</b> !</h1>
-                        <h2 v-if="show_logged_in_text" class="logged-in-text">Get ready ... The thrill is about to begin!</h2>
-                    </div>
-                </Transition>
-            </div>
-
-            <Dialog v-model:visible="show_disconnected_dialog" modal :style="{ width: '18rem' }">
-                <template #container="{ closeCallback }">
-                    <div class="flex flex-column align-items-center p-5 surface-overlay border-round">
-                        <div class="border-circle bg-yellow-500 inline-flex justify-content-center align-items-center h-6rem w-6rem -mt-8">
-                            <i class="pi pi-exclamation-triangle text-5xl"></i>
+                    <Transition name="fade-inout" @after-leave="(e) => logged_in_text_left.happened(e)">
+                        <div>
+                            <h1 v-if="show_logged_in_text" class="logged-in-text">You are logged in as <b>{{ username_entry }}</b> !</h1>
+                            <h2 v-if="show_logged_in_text" class="logged-in-text">Get ready ... The thrill is about to begin!</h2>
                         </div>
-                        <span class="font-bold text-2xl block mb-2 mt-4">Connection lost</span>
-                        <p class="mb-0">You have been disconnected from the game server.</p>
-                        <div class="flex align-items-center gap-2 mt-4">
-                            <Button label="Go back to start" @click="disconnectModelAcknowledge"></Button>
+                    </Transition>
+                </div>
+
+                <Dialog v-model:visible="show_disconnected_dialog" modal :style="{ width: '18rem' }">
+                    <template #container="{ closeCallback }">
+                        <div class="flex flex-column align-items-center p-5 surface-overlay border-round">
+                            <div class="border-circle bg-yellow-500 inline-flex justify-content-center align-items-center h-6rem w-6rem -mt-8">
+                                <i class="pi pi-exclamation-triangle text-5xl"></i>
+                            </div>
+                            <span class="font-bold text-2xl block mb-2 mt-4">Connection lost</span>
+                            <p class="mb-0">You have been disconnected from the game server.</p>
+                            <div class="flex align-items-center gap-2 mt-4">
+                                <Button label="Go back to start" @click="disconnectModelAcknowledge"></Button>
+                            </div>
                         </div>
-                    </div>
-                </template>
-            </Dialog>
-        </div>
+                    </template>
+                </Dialog>
+            </div>
+        </Transition>
+        <Transition name="fade-inout" @after-leave="(e) => questioning_elements_left.happened(e)">
+            <div v-if="show_questioning_elements" class="centering-wrapper">
+                <div v-if="show_text_question">
+                    questino text
+                </div>
+                <div v-if="show_yes_no_question">
+                    yesno question
+                </div>
+                <div v-if="show_multi_question">
+                    multi q
+                </div>
+                <div v-if="show_awaiting_results_card">
+                    awaiting results
+                </div>
+                <div v-if="show_results_card">
+                    results
+                </div>
+                <div v-if="show_ranking_card">
+                    ranking
+                </div>
+            </div>
+        </Transition>
     </main>
 </template>
 
