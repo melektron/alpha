@@ -9,7 +9,8 @@ Main application entry point
 
 import './assets/main.css';
 //import 'primevue/resources/themes/lara-dark-cyan/theme.css'
-import 'primevue/resources/themes/aura-light-lime/theme.css'
+//import 'primevue/resources/themes/aura-light-lime/theme.css'
+import 'primevue/resources/themes/aura-light-purple/theme.css'
 import 'primeflex/primeflex.css'
 
 import { createApp } from 'vue';
