@@ -416,7 +416,7 @@ watchEffect(async () => {
 
             <Dialog v-model:visible="show_disconnected_dialog" modal :style="{ width: '18rem' }">
                 <template #container="{ closeCallback }">
-                    <div class="flex flex-column align-items-center p-5 surface-overlay border-round">
+                    <div class="flex flex-column align-items-center p-5 surface-overlay" style="border-radius: 11px;">
                         <div class="border-circle bg-yellow-500 inline-flex justify-content-center align-items-center h-6rem w-6rem -mt-8">
                             <i class="pi pi-exclamation-triangle text-5xl"></i>
                         </div>
