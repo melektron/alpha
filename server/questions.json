@@ -110,7 +110,7 @@
     {
       "question": "What is the chemical symbol for gold?",
       "choices": ["Au", "Ag", "Fe", "Cu"],
-      "valid": [1]
+      "valid": [0]
     },
     {
       "question": "Which planet is known as the \"Red Planet\"?",
@@ -120,12 +120,12 @@
     {
       "question": "What is the tallest mountain in the world?",
       "choices": ["Mount Everest", "K2", "Mount Kilimanjaro", "Mount Fuji"],
-      "valid": [1]
+      "valid": [0]
     },
     {
       "question": "Who painted the Mona Lisa?",
       "choices": ["Michelangelo", "Leonardo da Vinci", "Vincent van Gogh", "Pablo Picasso"],
-      "valid": [2]
+      "valid": [1]
     },
     {
       "question": "What is the chemical formula for water?",
@@ -135,7 +135,7 @@
     {
       "question": "In which year did the Titanic sink?",
       "choices": ["1910", "1912", "1914", "1916"],
-      "valid": [2]
+      "valid": [1]
     },
     {
       "question": "Who is known as the father of modern physics?",
