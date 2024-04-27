@@ -49,7 +49,7 @@ onMounted(() => {
 watchEffect(() => {
     if (props.enabled && watch_for_enabling) {
         watch_for_enabling = false; 
-        setTimeout(playAnimation, Math.random() * 8);
+        setTimeout(playAnimation, Math.random() * 2);
     }
 })
 
@@ -59,13 +59,14 @@ async function playAnimation(e: Event) {
     
     if (!props.enabled) {
         watch_for_enabling = true;
+        return;
     }
 
     top.value = Math.random() * canvas.height.value;
     left.value = Math.random() * canvas.width.value;
     start_angle.value = Math.random() * 90 - 45;
     stop_angle.value = Math.random() * 90 - 45;
-    time.value = Math.random() * 5 + 10;
+    time.value = Math.random() * 4 + 2;
     size.value = Math.random() * 20 + 10;
 
     await nextTick();
@@ -87,7 +88,7 @@ async function playAnimation(e: Event) {
     top: v-bind(top_pixels);
     left: v-bind(left_pixels);
 
-    color: var(--primary-200);
+    color: var(--primary-500);
 
     transform-origin: top left;
     transform: scale(0) rotate(0deg) translate(-50%, -50%);

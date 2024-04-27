@@ -39,11 +39,6 @@ const show_awaiting_results_card = ref<boolean>(false);
 const show_results_card = ref<boolean>(false);
 const show_ranking_card = ref<boolean>(false);
 
-//watchEffect(() => console.log("show_connect_card", show_connect_card.value));
-//watchEffect(() => console.log("show_login_card", show_login_card.value));
-//watchEffect(() => console.log("show_disconnected_dialog", show_disconnected_dialog.value));
-//watchEffect(() => console.log("show_logged_in_text", show_logged_in_text.value));
-
 // event awaiters
 const setup_elements_left = new AwaitableEvent<Element>();
 const questioning_elements_left = new AwaitableEvent<Element>();
@@ -52,7 +47,6 @@ const any_base_element_left = new AwaitableEvent<Element>();
 const connect_card_left = new AwaitableEvent<Element>();
 const login_card_left = new AwaitableEvent<Element>();
 const logged_in_text_left  = new AwaitableEvent<Element>();
-const ranking_card_left = new AwaitableEvent<Element>();
 
 
 // connect form state
@@ -225,7 +219,7 @@ watchEffect(async () => {
 <template>
     <div class="background">
         <!-- Backdrop between background and foreground -->
-        <BubbleField class="bubble_field"/>
+        <BubbleField :enabled="show_awaiting_results_card" class="bubble_field"/>
 
         <main>
             <Transition name="fade-inout" @after-leave="(e) => {setup_elements_left.happened(e); any_base_element_left.happened(e);}">

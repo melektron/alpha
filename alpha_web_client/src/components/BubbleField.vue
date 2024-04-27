@@ -11,7 +11,9 @@ Block element that randomly shows twinkling/sparkling/bubbling questionmarks and
 import { ref } from "vue";
 import CharacterBubble from "./CharacterBubble.vue";
 
-const enabled = ref<boolean>(true);
+const props = defineProps<{
+    enabled: boolean
+}>();
 
 </script>
 
@@ -23,18 +25,18 @@ const enabled = ref<boolean>(true);
     -->
     <div>
         <div class="relative w-full h-full overflow-hidden">
-            <CharacterBubble :enabled="enabled">?</CharacterBubble>
-            <CharacterBubble :enabled="enabled">?</CharacterBubble>
-            <CharacterBubble :enabled="enabled">?</CharacterBubble>
-            <CharacterBubble :enabled="enabled">?</CharacterBubble>
-            <CharacterBubble :enabled="enabled">?</CharacterBubble>
-            <CharacterBubble :enabled="enabled">?</CharacterBubble>
-            <CharacterBubble :enabled="enabled">!</CharacterBubble>
-            <CharacterBubble :enabled="enabled">!</CharacterBubble>
-            <CharacterBubble :enabled="enabled">!</CharacterBubble>
-            <CharacterBubble :enabled="enabled">!</CharacterBubble>
-            <CharacterBubble :enabled="enabled">!</CharacterBubble>
-            <CharacterBubble :enabled="enabled">!</CharacterBubble>
+            <CharacterBubble :enabled="props.enabled">?</CharacterBubble>
+            <CharacterBubble :enabled="props.enabled">?</CharacterBubble>
+            <CharacterBubble :enabled="props.enabled">?</CharacterBubble>
+            <CharacterBubble :enabled="props.enabled">?</CharacterBubble>
+            <CharacterBubble :enabled="props.enabled">?</CharacterBubble>
+            <CharacterBubble :enabled="props.enabled">?</CharacterBubble>
+            <CharacterBubble :enabled="props.enabled">!</CharacterBubble>
+            <CharacterBubble :enabled="props.enabled">!</CharacterBubble>
+            <CharacterBubble :enabled="props.enabled">!</CharacterBubble>
+            <CharacterBubble :enabled="props.enabled">!</CharacterBubble>
+            <CharacterBubble :enabled="props.enabled">!</CharacterBubble>
+            <CharacterBubble :enabled="props.enabled">!</CharacterBubble>
         </div>
     </div>
 </template>
