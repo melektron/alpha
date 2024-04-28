@@ -298,12 +298,12 @@ export const useKaYeetGame = defineStore("kayeet", () => {
         if (!/^wss?:\/\//i.test(input_host)) {
             // If not, prepend ws://
             console.log("no proto")
-            input_host = 'ws://' + input_host;
+            input_host = 'wss://' + input_host;
         }
         // Now construct the URL
         var url = new URL(input_host);
         // set the port to default if not provided
-        if (url.port === "")
+        if (url.port === "" && url.protocol === "ws:")
             url.port = "1647";
         return url;
     }
