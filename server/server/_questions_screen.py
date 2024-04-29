@@ -15,6 +15,12 @@ import asyncio
 import math
 
 
+class LeaderboardBox(tp.TypedDict):
+    frame: ctk.CTkFrame
+    nick_label: ctk.CTkLabel
+    score_label: ctk.CTkLabel
+
+
 class QuestionsScreen(ctk.CTkFrame):
     def __init__(
             self,
@@ -39,6 +45,13 @@ class QuestionsScreen(ctk.CTkFrame):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
+        # initialize tkinter stuff
+        self._init_ui()
+
+    def _init_ui(self) -> None:
+        """
+        create and initialize all ctk widgets
+        """
         # waiting for game start
         self._waiting_box = ctk.CTkFrame(self)
         self._waiting_box.grid(row=0, column=0, sticky="nsew")
@@ -72,16 +85,21 @@ class QuestionsScreen(ctk.CTkFrame):
 
         self._question_title = ctk.CTkLabel(
             self._questions_box,
-            font=("Arial", 32),
+            font=("Arial", 64),
             text="Le Question",
         )
         self._question_title.grid(row=0, column=0)
 
-        self._next_question_btn = ctk.CTkButton(
+        self._skip_button = ctk.CTkButton(
             self._questions_box,
-            text="Next Question",
+            text="Skip",
             font=("Arial", 48),
-            command=lambda: self._synchronize(self._show_leaderboard())
+            command=lambda: self._synchronize(self.show_leaderboard())
+        )
+        self._skip_button.grid(
+            row=0,
+            column=1,
+            padx=100
         )
 
         # text answered questions
@@ -109,9 +127,100 @@ class QuestionsScreen(ctk.CTkFrame):
         )
         self._choice_widgets: list[ctk.CTkLabel] = []
 
-    def grid(self, **kwargs) -> None:
-        self.after(10, self._sync_new_question)
+        # leader board
+        self._leaderboard_box = ctk.CTkFrame(self)
 
+        self._leaderboard_box.grid_rowconfigure((0, 1), weight=1)
+        self._leaderboard_box.grid_columnconfigure(0, weight=1)
+
+        ctk.CTkLabel(
+            self._leaderboard_box,
+            text="Leaderboard",
+            font=("Arial", 64),
+        ).grid(
+            row=0,
+            column=0,
+            sticky="nsew"
+        )
+
+        self._next_question_button = ctk.CTkButton(
+            self._leaderboard_box,
+            text="Next Question",
+            font=("Arial", 48),
+            command=lambda: self._synchronize(self.new_question())
+        )
+        self._next_question_button.grid(
+            row=0,
+            column=1,
+            padx=100
+        )
+
+        self._leaderboard_frame = ctk.CTkFrame(
+            self._leaderboard_box,
+            corner_radius=30
+        )
+
+        # configure grid for 5 boxes
+        self._leaderboard_frame.grid_columnconfigure(0, weight=1)
+        self._leaderboard_frame.grid_rowconfigure(list(range(5)), weight=1)
+
+        self._leaderboard_frame.grid(
+            row=1,
+            column=0,
+            sticky="ew",
+            padx=80,
+            pady=40
+        )
+
+        # create 5 boxes
+        self._leaderboard_boxes: list[LeaderboardBox] = []
+        for i in range(5):
+            frame = ctk.CTkFrame(self._leaderboard_frame, corner_radius=15)
+            frame.grid_rowconfigure(0, weight=1)
+            frame.grid_columnconfigure((1, 2), weight=1)
+
+            ctk.CTkLabel(frame, text=str(i+1), font=("Arial", 32)).grid(
+                row=0,
+                column=0,
+                padx=40
+            )
+
+            self._leaderboard_boxes.append({
+                "frame": frame,
+                "nick_label": ctk.CTkLabel(
+                    frame,
+                    font=("Arial", 32),
+                    text="Nickname"
+                ),
+                "score_label": ctk.CTkLabel(
+                    frame,
+                    font=("Arial", 32),
+                    text="Score"
+                ),
+            })
+
+            self._leaderboard_boxes[-1]["nick_label"].grid(
+                row=0,
+                column=1,
+                padx=30,
+                pady=30,
+                sticky="nsew"
+            )
+            self._leaderboard_boxes[-1]["score_label"].grid(
+                row=0,
+                column=2,
+                padx=30,
+                pady=30,
+                sticky="nsew"
+            )
+
+    def grid(self, **kwargs):
+        # override parent grid method to call new_question right after
+        # the widget has been placed
+        self.after(10, self._synchronize(self.new_question()))
+
+        # call parent class grid method, so the user doesn't even notice
+        # what we did here
         super().grid(**kwargs)
 
     def _synchronize(self, future: tp.Coroutine) -> None:
@@ -120,15 +229,11 @@ class QuestionsScreen(ctk.CTkFrame):
         """
         self._loop.create_task(future)
 
-    def _sync_new_question(self) -> None:
-        self._loop.create_task(self._new_question())
-
-    async def _new_question(self) -> None:
+    async def new_question(self) -> None:
         """
         a new question appeared
         """
         self._current_question: dict = ...
-        self._next_question_btn.grid_forget()
 
         # get new question
         question = self._server.next_question()
@@ -139,10 +244,8 @@ class QuestionsScreen(ctk.CTkFrame):
 
         # adjust UI
         self._waiting_box.grid_forget()
+        self._leaderboard_box.grid_forget()
         self._questions_box.grid(row=0, column=0, sticky="nsew")
-        self._next_question_btn.configure(
-            command=lambda: self._synchronize(self._show_leaderboard())
-        )
 
         self._question_title.configure(text=question["question"])
 
@@ -151,6 +254,7 @@ class QuestionsScreen(ctk.CTkFrame):
             self._text_question_box.grid(
                 row=1,
                 column=0,
+                columnspan=2,
                 sticky="nsew",
                 padx=40,
                 pady=50
@@ -164,6 +268,7 @@ class QuestionsScreen(ctk.CTkFrame):
             self._choice_box.grid(
                 row=1,
                 column=0,
+                columnspan=2,
                 sticky="nsew",
                 padx=40,
                 pady=50
@@ -215,20 +320,47 @@ class QuestionsScreen(ctk.CTkFrame):
         await CLIENTS.ask_question(question)
         await CLIENTS.question_done()
         await CLIENTS.send_statistics()
-        # await self._new_question()
+        await self.show_leaderboard()
 
-    async def _show_leaderboard(self) -> None:
+    async def show_leaderboard(self) -> None:
         """
         shows the correct answer to the question
         """
-        self._next_question_btn.configure(
-            command=lambda: self._synchronize(self._new_question())
-        )
-        self._next_question_btn.grid(
-            row=0,
-            column=1,
-            padx=100
-        )
+        # make sure, the question is done
+        CLIENTS.skip_question()
+
+        # adjust ui
+        self._questions_box.grid_forget()
+
+        # it should never be called from the waiting screen, but who tf
+        # knows what future me is going to do ...
+        self._waiting_box.grid_forget()
+
+        self._leaderboard_box.grid(row=0, column=0, sticky="nsew")
+
+        # un-grid stuff
+        for box in self._leaderboard_boxes:
+            box["frame"].grid_forget()
+
+        # draw leaderboard
+        for i, (score, username) in enumerate(CLIENTS.get_leaderboard()):
+            # only draw first five clients
+            if i > 4:
+                break
+
+            # grid frame
+            box = self._leaderboard_boxes[i]
+            box["frame"].grid(
+                row=i,
+                column=0,
+                sticky="nsew",
+                pady=20,
+                padx=30
+            )
+
+            # adjust username and score
+            box["score_label"].configure(text=str(score))
+            box["nick_label"].configure(text=username)
 
     def _update_animation(self) -> None:
         """

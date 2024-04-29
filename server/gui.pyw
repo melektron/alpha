@@ -7,7 +7,7 @@ the server ui
 Author:
 Nilusink
 """
-from server import CollectionWindow, Server, HOST, PORT, WS_PORT
+from server import CollectionWindow, Server, HOST, PORT, WS_PORT, CLIENTS
 from server import QuestionsScreen
 import customtkinter as ctk
 import asyncio
@@ -71,8 +71,14 @@ class Window(ctk.CTk):
         """
         start se game
         """
+        # check, if any users are even connected
+        if len(CLIENTS) == 0:
+            return
+
+        # start game
         self._server.start_game()
 
+        # adjust ui
         self._waiting_room.grid_forget()
         self._questions_screen.grid(row=0, column=0, sticky="nsew")
 

@@ -36,6 +36,7 @@ class Clients:
         self._answered = []
         self._question_time = 15
         self._current_timeout = ...
+        self.__skip_question: bool = False
 
     def check_username(self, username: str) -> bool:
         """
@@ -64,6 +65,7 @@ class Clients:
         """
         futures = []
         self._answered.clear()
+        self.__skip_question = False
         for client in self._clients:
             futures.append(client.ask_question(question, self._qid))
             self._unanswered[self._qid] = {
@@ -99,6 +101,10 @@ class Clients:
             if len(self._unanswered) == 0:
                 break
 
+            # check, if the question was skipped
+            elif self.__skip_question:
+                break
+
             await asyncio.sleep(.5)
 
         # remove any unanswered questions
@@ -119,6 +125,12 @@ class Clients:
 
         self._unanswered.clear()
         await asyncio.gather(*futures)
+
+    def skip_question(self) -> None:
+        """
+        skip the currently active question
+        """
+        self.__skip_question = True
 
     def answer_question(self, qid: int, answer: str) -> bool:
         """
@@ -178,20 +190,30 @@ class Clients:
         })
         return True
 
-    async def send_statistics(self) -> None:
+    def get_leaderboard(self) -> list[tuple[int, str]]:
         """
-        update all clients about the current rankings
+        get the current leaderboard, sorted by score
         """
         ranking = [(c.score, c.username) for c in self._clients]
         ranking = sorted(ranking, key=lambda _: _[0], reverse=True)
 
+        return ranking
+
+    async def send_statistics(self) -> None:
+        """
+        update all clients about the current rankings
+        """
+
         await self.send_all({
             "type": "stats",
-            "ranking": ranking
+            "ranking": self.get_leaderboard()
         })
 
     def __iter__(self) -> tp.Iterator:
         return iter(self._clients)
+
+    def __len__(self) -> int:
+        return len(self._clients)
 
 
 CLIENTS = Clients()

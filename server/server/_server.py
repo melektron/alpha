@@ -41,12 +41,12 @@ class Server:
 
         # create questions master
         self._qmaster = QuestionsMaster
-        self._qmaster.load_from_file("./questions.json")
+        self._qmaster.load_from_file("./questions/general.json")
         self._questions = ...
         self._current_question = -1
 
         self._loop = loop
-        self._ = ...
+        self._coroutines = []
 
     async def receive_clients(self):
         ic("receiving")
@@ -67,7 +67,7 @@ class Server:
             client = Client(c)
 
             if self._accepting:
-                self._ = self._loop.create_task(client.run())
+                self._coroutines.append(self._loop.create_task(client.run()))
 
             # reject clients, if time is over
             else:
@@ -100,8 +100,15 @@ class Server:
             await asyncio.Future()  # run forever
 
     async def start_tasks(self) -> None:
-        self._ = self._loop.create_task(self.receive_clients())
-        self._ = self._loop.create_task(self.receive_ws_clients())
+        """
+        start background tasks
+        """
+        self._coroutines.append(
+            self._loop.create_task(self.receive_clients())
+        )
+        self._coroutines.append(
+            self._loop.create_task(self.receive_ws_clients())
+        )
 
     def create_questions(self, n: int) -> None:
         """
@@ -156,7 +163,7 @@ class Server:
                     await CLIENTS.ask_question(question)
                     await CLIENTS.question_done()
                     await CLIENTS.send_statistics()
-                    await aioconsole.ainput('Press enter for next question...')
+                    await aioconsole.ainput('Press enter to profit! ')
 
         except Exception as e:
             ic(e)

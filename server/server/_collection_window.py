@@ -49,6 +49,13 @@ class CollectionWindow(ctk.CTkFrame):
         self._drawn_clients: list[Client] = []
         self._client_boxes: list[ClientBox] = []
 
+        # initialize tkinter stuff
+        self._init_ui()
+
+    def _init_ui(self) -> None:
+        """
+        create and initialize all ctk widgets
+        """
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
 
