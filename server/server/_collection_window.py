@@ -15,6 +15,7 @@ from ._server import Server
 import customtkinter as ctk
 import socket
 import math
+import asyncio
 
 
 def get_host() -> str:
@@ -75,6 +76,9 @@ class CollectionWindow(ctk.CTkFrame):
 
         self._current_columns: int = -1
         self._current_rows: int = -1
+
+        # reference to ensure task will continue to run
+        self._start_task: asyncio.Task | None = None
 
         # initialize tkinter stuff
         self._init_ui()
@@ -137,11 +141,16 @@ class CollectionWindow(ctk.CTkFrame):
             pady=80
         )
 
+        def start_callback() -> None:
+            self._start_task = asyncio.create_task(
+                self._parent.start_game()
+            )
+
         ctk.CTkButton(
             self,
             text="Start",
             font=("Arial", 48),
-            command=lambda: self._parent.start_game(),
+            command=start_callback,
             corner_radius=30
         ).grid(
             row=0,

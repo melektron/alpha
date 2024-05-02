@@ -9,6 +9,7 @@ Nilusink
 """
 from server import CollectionWindow, Server, HOST, PORT, WS_PORT, CLIENTS
 from server import QuestionsScreen
+from server._audio import AUDIO
 import customtkinter as ctk
 import asyncio
 
@@ -59,6 +60,9 @@ class Window(ctk.CTk):
         # start server
         await self._server.start_tasks()
 
+        # start playing waiting room audio
+        AUDIO.start_connect_sound()
+
         while self.running:
             await self._waiting_room.update()
 
@@ -67,7 +71,7 @@ class Window(ctk.CTk):
 
             await asyncio.sleep(.02)
 
-    def start_game(self) -> None:
+    async def start_game(self) -> None:
         """
         start se game
         """
@@ -78,8 +82,11 @@ class Window(ctk.CTk):
         # start game
         self._server.start_game()
 
-        # adjust ui
+        # remove waiting room
         self._waiting_room.grid_forget()
+        await AUDIO.end_connect_sound()
+        await asyncio.sleep(1)  # one extra second for tension
+        # show first question
         self._questions_screen.grid(row=0, column=0, sticky="nsew")
 
     def game_done(self) -> None:
@@ -90,6 +97,9 @@ class Window(ctk.CTk):
 
         self._questions_screen.grid_forget()
         self._waiting_room.grid(row=0, column=0, sticky="nsew")
+
+        # start playing connect sound again
+        AUDIO.start_connect_sound()
 
     def end(self) -> None:
         """

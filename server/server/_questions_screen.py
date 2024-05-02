@@ -9,6 +9,7 @@ Nilusink
 """
 from ._client import CLIENTS
 from ._server import Server
+from ._audio import AUDIO
 import customtkinter as ctk
 import typing as tp
 import asyncio
@@ -349,10 +350,16 @@ class QuestionsScreen(ctk.CTkFrame):
 
         self._current_question = question
 
+        # start question sound
+        AUDIO.start_question_sound()
+
         await CLIENTS.ask_question(question)
         await CLIENTS.question_done()
         await CLIENTS.send_statistics()
         await self.show_leaderboard()
+
+        # stop the question sound
+        await AUDIO.end_question_sound()
 
     async def show_leaderboard(self) -> None:
         """
