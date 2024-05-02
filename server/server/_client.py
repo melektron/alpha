@@ -7,8 +7,8 @@ Defines how a client should be handled
 Author:
 Nilusink
 """
+from websockets.exceptions import ConnectionClosedOK, ConnectionClosedError
 from websockets.legacy.server import WebSocketServerProtocol
-from websockets.exceptions import ConnectionClosedOK
 from ._questions_master import QuestionsMaster
 from time import perf_counter
 from icecream import ic
@@ -378,7 +378,13 @@ class WsClient(Client):
         try:
             await self._socket.send(json.dumps(message))
 
-        except ConnectionClosedOK:
+        except (
+                socket.gaierror,
+                ConnectionAbortedError,
+                ConnectionResetError,
+                ConnectionClosedOK,
+                ConnectionClosedError
+        ):
             await self.close()
 
     async def receive_client(self) -> dict | None:
@@ -392,11 +398,12 @@ class WsClient(Client):
                 socket.gaierror,
                 ConnectionAbortedError,
                 ConnectionResetError,
-                ConnectionClosedOK
+                ConnectionClosedOK,
+                ConnectionClosedError
         ) as e:
             ic("closed: ", e)
             await self.close()
-            return None
+            return
 
         if request == b"":
             ic("client disconnect", self.username)
