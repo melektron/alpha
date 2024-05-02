@@ -86,14 +86,15 @@ async def main(loop: asyncio.AbstractEventLoop) -> None:
         print(f"Failed to log in: {answer["reason"]}")
         return
 
-        # clients.append(client)
+    # clients.append(client)
 
-    #     await asyncio.sleep(.5)
-    #
+    await asyncio.sleep(.5)
+
     # await asyncio.sleep(5)
     # for client in clients:
     #     client.close()
     #     await asyncio.sleep(.5)
+    # client = clients[0]
 
     # exit(0)
 

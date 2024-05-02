@@ -96,6 +96,7 @@ class Clients:
         """
         waits until the question is over
         """
+        # #websockets.exceptions.ConnectionClosedError
         while perf_counter() - self._current_timeout < self._question_time:
             # all clients done
             if len(self._unanswered) == 0:

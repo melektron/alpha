@@ -7,10 +7,31 @@ the waiting room thingy
 Author:
 Nilusink
 """
+import os
+
 from ._client import CLIENTS, Client
+from customtkinter import filedialog
+from ._server import Server
 import customtkinter as ctk
 import socket
 import math
+
+
+def get_host() -> str:
+    """
+    get the best host address
+    """
+    hostname = socket.gethostname()
+
+    match hostname:
+        case "DESKTOP-RV1IG8H":
+            return "kayeet.nilus.ink"
+
+        case "elektronlab":
+            return "kayeet.elektron.work"
+
+        case _:
+            return socket.gethostbyname(hostname)
 
 
 class ClientBox(ctk.CTkFrame):
@@ -41,13 +62,19 @@ class ClientBox(ctk.CTkFrame):
 class CollectionWindow(ctk.CTkFrame):
     max_columns = 6
 
-    def __init__(self, parent, *args, **kwargs) -> None:
+    def __init__(self, parent, server: Server, *args, **kwargs) -> None:
         self._parent = parent
+        self._server = server
 
+        # initialize parent class
         super().__init__(parent, *args, **kwargs)
 
+        # create variables for the ui
         self._drawn_clients: list[Client] = []
         self._client_boxes: list[ClientBox] = []
+
+        self._current_columns: int = -1
+        self._current_rows: int = -1
 
         # initialize tkinter stuff
         self._init_ui()
@@ -59,14 +86,52 @@ class CollectionWindow(ctk.CTkFrame):
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
 
-        self._title = ctk.CTkLabel(
+        title_box = ctk.CTkFrame(
             self,
-            text=f"Host: {socket.gethostbyname(socket.gethostname())}",
+            fg_color="transparent"
+        )
+        title_box.grid(
+            row=0,
+            column=0,
+            sticky="nsew",
+            padx=80
+        )
+
+        title_box.grid_rowconfigure(0, weight=1)
+        title_box.grid_columnconfigure(2, weight=1)
+
+        # question set choice
+        ctk.CTkLabel(
+            title_box,
+            text="Questions: ",
+            font=("Arial", 48)
+        ).grid(
+            row=0,
+            column=0,
+            sticky="nsew",
+            padx=10
+        )
+
+        self._file_btn = ctk.CTkButton(
+            title_box,
+            text=self._server.qmaster.question_set_name,
+            font=("Arial", 32),
+            command=self._open_questions
+        )
+        self._file_btn.grid(
+            row=0,
+            column=1,
+        )
+
+        # title
+        self._title = ctk.CTkLabel(
+            title_box,
+            text=f"Host: {get_host()}",
             font=("Arial", 64)
         )
         self._title.grid(
             row=0,
-            column=0,
+            column=2,
             sticky="nsew",
             padx=20,
             pady=80
@@ -96,6 +161,25 @@ class CollectionWindow(ctk.CTkFrame):
 
         self._current_columns = 0
         self._current_rows = 0
+
+    def _open_questions(self) -> None:
+        """
+        choose a new file to load questions from
+        """
+        file = filedialog.askopenfilename(
+            defaultextension=".json",
+            filetypes=[("Json files", ".json")],
+            initialdir=os.getcwd(),
+            title="Load Questions"
+        )
+
+        # don't change anything if no file has been chosen
+        if file is None:
+            return
+
+        # discard old questions and load new ones
+        self._server.qmaster.reset_questions()
+        self._server.qmaster.load_from_file(file)
 
     def reset_grid(self) -> None:
         """

@@ -39,7 +39,7 @@ class QuestionsScreen(ctk.CTkFrame):
         )
         self.parent = parent
         self._loop = event_loop
-        self._server = server
+        self._server: Server = server
         self._current_question: dict = ...
 
         self.grid_rowconfigure(0, weight=1)
@@ -90,6 +90,17 @@ class QuestionsScreen(ctk.CTkFrame):
         )
         self._question_title.grid(row=0, column=0)
 
+        self._current_question_label = ctk.CTkLabel(
+            self._questions_box,
+            text="0 of 0",
+            font=("Arial", 32),
+        )
+        self._current_question_label.grid(
+            row=0,
+            column=1,
+            sticky="nsew"
+        )
+
         self._skip_button = ctk.CTkButton(
             self._questions_box,
             text="Skip",
@@ -98,7 +109,7 @@ class QuestionsScreen(ctk.CTkFrame):
         )
         self._skip_button.grid(
             row=0,
-            column=1,
+            column=2,
             padx=100
         )
 
@@ -133,11 +144,12 @@ class QuestionsScreen(ctk.CTkFrame):
         self._leaderboard_box.grid_rowconfigure((0, 1), weight=1)
         self._leaderboard_box.grid_columnconfigure(0, weight=1)
 
-        ctk.CTkLabel(
+        self._leaderboard_title = ctk.CTkLabel(
             self._leaderboard_box,
             text="Leaderboard",
             font=("Arial", 64),
-        ).grid(
+        )
+        self._leaderboard_title.grid(
             row=0,
             column=0,
             sticky="nsew"
@@ -148,6 +160,12 @@ class QuestionsScreen(ctk.CTkFrame):
             text="Next Question",
             font=("Arial", 48),
             command=lambda: self._synchronize(self.new_question())
+        )
+        self._done_button = ctk.CTkButton(
+            self._leaderboard_box,
+            text="New Game",
+            font=("Arial", 48),
+            command=self._game_done
         )
         self._next_question_button.grid(
             row=0,
@@ -239,8 +257,7 @@ class QuestionsScreen(ctk.CTkFrame):
         question = self._server.next_question()
 
         if question is None:
-            self.parent.game_done()
-            return
+            return self._game_done()
 
         # adjust UI
         self._waiting_box.grid_forget()
@@ -249,8 +266,14 @@ class QuestionsScreen(ctk.CTkFrame):
 
         self._question_title.configure(text=question["question"])
 
+        # configure the "x of y" questions label
+        self._current_question_label.configure(
+            text=f"{self._server.current_question} of {self._server.n_questions}"
+        )
+
         if question["question_type"] == 0:
             self._choice_box.grid_forget()
+            self._text_question_entry.configure(text="Type your answer...")
             self._text_question_box.grid(
                 row=1,
                 column=0,
@@ -261,14 +284,23 @@ class QuestionsScreen(ctk.CTkFrame):
             )
 
         elif question["question_type"] == 1:
-            raise NotImplementedError("Yes No Questions do not exist yet!")
+            self._choice_box.grid_forget()
+            self._text_question_entry.configure(text="Yes or No")
+            self._text_question_box.grid(
+                row=1,
+                column=0,
+                columnspan=3,
+                sticky="nsew",
+                padx=40,
+                pady=50
+            )
 
         elif question["question_type"] == 2:
             self._text_question_box.grid_forget()
             self._choice_box.grid(
                 row=1,
                 column=0,
-                columnspan=2,
+                columnspan=3,
                 sticky="nsew",
                 padx=40,
                 pady=50
@@ -338,6 +370,16 @@ class QuestionsScreen(ctk.CTkFrame):
 
         self._leaderboard_box.grid(row=0, column=0, sticky="nsew")
 
+        # customize for final leaderboard
+        if self._server.current_question == self._server.n_questions:
+            self._next_question_button.grid_forget()
+            self._done_button.grid(
+                row=0,
+                column=2,
+                padx=100
+            )
+            self._leaderboard_title.configure(text="Final Leaderboard")
+
         # un-grid stuff
         for box in self._leaderboard_boxes:
             box["frame"].grid_forget()
@@ -361,6 +403,18 @@ class QuestionsScreen(ctk.CTkFrame):
             # adjust username and score
             box["score_label"].configure(text=str(score))
             box["nick_label"].configure(text=username)
+
+    def _game_done(self) -> None:
+        """
+        call the parent's game done function and re-configure the ui
+        """
+        self._done_button.grid_forget()
+        self._next_question_button.grid(
+            row=0,
+            column=2,
+            padx=100
+        )
+        self.parent.game_done()
 
     def _update_animation(self) -> None:
         """

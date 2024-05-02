@@ -40,33 +40,40 @@ class Server:
         self._socket.listen()
 
         # create questions master
-        self._qmaster = QuestionsMaster
-        self._qmaster.load_from_file("./questions/general.json")
+        self.qmaster = QuestionsMaster
+        self.qmaster.load_from_file("./questions/general.json")
         self._questions = ...
         self._current_question = -1
 
+        # async magic
         self._loop = loop
         self._coroutines = []
 
     async def receive_clients(self):
+        """
+        accept clients via tcp socket and create a client instance for each
+        connection made
+        """
         ic("receiving")
         while self.running:
             try:
+                # wait for new client to connect
                 ic("waiting")
                 c, _ = await self._loop.sock_accept(self._socket)
-                ic("new client")
 
             except TimeoutError:
-                ic("timeout")
                 continue
 
             except Exception as e:
                 ic("error accepting: ", e)
                 continue
 
+            # create client instance
             client = Client(c)
+            ic("new client")
 
             if self._accepting:
+                # start client loop
                 self._coroutines.append(self._loop.create_task(client.run()))
 
             # reject clients, if time is over
@@ -76,6 +83,7 @@ class Server:
                     "error_type": 0,
                     "cause": "login over"
                 })
+                client.close()
 
     async def receive_ws_clients(self) -> None:
         """
@@ -86,6 +94,7 @@ class Server:
             client = WsClient(c)
 
             if self._accepting:
+                # start client loop
                 await self._loop.create_task(client.run())
 
             # reject clients, if time is over
@@ -114,12 +123,15 @@ class Server:
         """
         generate new questions
         """
-        self._questions = self._qmaster.get_random_question(
+        self._questions = self.qmaster.get_random_question(
             n_questions=n,
         )
         self._current_question = 0
 
     def next_question(self) -> dict | None:
+        """
+        get the next question from the queue
+        """
         try:
             out = self._questions[self._current_question]
 
@@ -129,6 +141,20 @@ class Server:
         self._current_question += 1
 
         return out
+
+    @property
+    def current_question(self) -> int:
+        """
+        number of the currently active question (id +  1)
+        """
+        return self._current_question
+
+    @property
+    def n_questions(self) -> int:
+        """
+        how many questions there are total
+        """
+        return len(self._questions)
 
     def start_game(self) -> None:
         """
@@ -146,7 +172,7 @@ class Server:
 
     async def run(self):
         """
-        run everything
+        run everything (cli version of the server)
         """
         # save to garbage
         await self.start_tasks()

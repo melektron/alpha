@@ -43,7 +43,7 @@ class Window(ctk.CTk):
         self.protocol("WM_DELETE_WINDOW", self.end)
 
         # grid stuff
-        self._waiting_room = CollectionWindow(self)
+        self._waiting_room = CollectionWindow(self, self._server)
         self._waiting_room.grid(row=0, column=0, sticky="nsew")
 
         self._questions_screen = QuestionsScreen(
