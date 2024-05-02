@@ -527,6 +527,8 @@ h1.logged-in-text {
 
 .ranking-table {
     width: 100%;
+    max-height: 40vh;
+    overflow-y: scroll;
 }
 
 .fade-inout-enter-active,
