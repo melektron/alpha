@@ -375,7 +375,11 @@ class WsClient(Client):
         """
         send a message to the user
         """
-        await self._socket.send(json.dumps(message))
+        try:
+            await self._socket.send(json.dumps(message))
+
+        except ConnectionClosedOK:
+            await self.close()
 
     async def receive_client(self) -> dict | None:
         """
