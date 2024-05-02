@@ -405,8 +405,20 @@ watchEffect(async () => {
                                     Ranking
                                 </h1>
                                 <DataTable :value="ranking_formatted" class="ranking-table">
-                                    <Column field="player" header="Player"></Column>
-                                    <Column field="score" header="Score"></Column>
+                                    <Column field="player" header="Player">
+                                        <template #body="{ data }">
+                                            <span :style="{color: data.player === username_entry ? 'var(--primary-700)' : 'inherit'}">
+                                                {{ data.player }}
+                                            </span>
+                                        </template>
+                                    </Column>
+                                    <Column field="score" header="Score">
+                                        <template #body="{ data }">
+                                            <span :style="{color: data.player === username_entry ? 'var(--primary-700)' : 'inherit'}">
+                                                {{ data.score }}
+                                            </span>
+                                        </template>
+                                    </Column>
                                 </DataTable>
                             </div>
                         </template>
