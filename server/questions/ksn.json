@@ -44,11 +44,6 @@
     "question": "What is a common wireless encryption protocol?",
     "choices": ["WEP (Wired Equivalent Privacy)", "HTTPS (Hypertext Transfer Protocol Secure)", "TCP (Transmission Control Protocol)", "FTP (File Transfer Protocol)"],
     "valid": [0]
-    },
-    {
-    "question": "What is the maximum transmission unit (MTU) size for Ethernet?",
-    "choices": ["1500 bytes", "1000 bytes", "2000 bytes", "500 bytes"],
-    "valid": [0]
     }
     ]
 }
