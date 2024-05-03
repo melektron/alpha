@@ -13,9 +13,9 @@ from ._client import CLIENTS, Client
 from customtkinter import filedialog
 from ._server import Server
 import customtkinter as ctk
+import asyncio
 import socket
 import math
-import asyncio
 
 
 def get_host() -> str:
@@ -183,7 +183,7 @@ class CollectionWindow(ctk.CTkFrame):
         )
 
         # don't change anything if no file has been chosen
-        if file is None:
+        if not isinstance(file, str) or not file:
             return
 
         # discard old questions and load new ones
