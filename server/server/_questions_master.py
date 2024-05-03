@@ -8,16 +8,17 @@ Author:
 Florian,
 Nilusink
 """
-from icecream import ic
-import typing as tp
+from icecream import ic 
+import typing as tp 
 import random
 import json
 import os
 
 
 class _QuestionsMaster:
-    __instance = ...
+    __instance = ... 
 
+    # alternative for print 
     def __new__(cls, *args, **kwargs):
         if cls.__instance is ...:
             ic("new QuestionsMaster instance")
@@ -81,6 +82,7 @@ class _QuestionsMaster:
         # run callbacks
         self._update_callbacks()
 
+    # get questions 
     @property
     def questions(self) -> dict:
         return self._questions.copy()
