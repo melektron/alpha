@@ -1,0 +1,95 @@
+{
+    "text": [
+        {
+            "question": "What is the largest mammal on Earth?",
+            "valid": [
+                "blue whale"
+            ],
+            "match_case": false
+        },
+        {
+            "question": "What is the fastest land animal?",
+            "valid": [
+                "cheetah"
+            ]
+        },
+        {
+            "question": "What is the largest mammal?",
+            "valid": [
+                "blue whale"
+            ],
+            "match_case": false
+        },
+        {
+            "question": "Which animal is known as the 'ship of the desert'?",
+            "valid": [
+                "camel"
+            ],
+            "match_case": false
+        }
+    ],
+    "choices": [
+        {
+            "question": "Which of the following animals is a marsupial?",
+            "choices": [
+                "Kangaroo",
+                "Elephant",
+                "Lion",
+                "Giraffe"
+            ],
+            "valid": [
+                0
+            ]
+        },
+        {
+            "question": "Which bird is known for its beautiful and elaborate courtship dances?",
+            "choices": [
+                "Peacock",
+                "Pigeon",
+                "Sparrow",
+                "Ostrich"
+            ],
+            "valid": [
+                0
+            ]
+        },
+        {
+            "question": "Which of the following animals is a marsupial?",
+            "choices": [
+                "Kangaroo",
+                "Elephant",
+                "Cheetah",
+                "Penguin"
+            ],
+            "valid": [
+                0
+            ]
+        },
+        {
+            "question": "Which of the following animals is a bird?",
+            "choices": [
+                "Frog",
+                "Eagle",
+                "Lion",
+                "Snake"
+            ],
+            "valid": [
+                1
+            ]
+        }
+    ],
+    "yesno": [
+        {
+            "question": "Can a penguin fly?",
+            "valid": false
+        },
+        {
+            "question": "Do sharks have bones?",
+            "valid": false
+        },
+        {
+            "question": "Are bats mammals?",
+            "valid": true
+        }
+    ]
+}
