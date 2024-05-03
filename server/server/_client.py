@@ -34,7 +34,7 @@ class Clients:
         self._qid = 0
         self._unanswered = {}
         self._answered = []
-        self._question_time = 15
+        self._question_time = 20
         self._current_timeout = ...
         self.__skip_question: bool = False
 
