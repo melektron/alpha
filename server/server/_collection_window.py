@@ -126,6 +126,9 @@ class CollectionWindow(ctk.CTkFrame):
             row=0,
             column=1,
         )
+        self._server.qmaster.on_question_set_change(
+            lambda name: self._file_btn.configure(text=name)
+        )
 
         # title
         self._title = ctk.CTkLabel(
