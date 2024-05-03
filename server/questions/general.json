@@ -197,5 +197,11 @@
       "choices": ["Atlantic Ocean", "Indian Ocean", "Southern Ocean", "Pacific Ocean"],
       "valid": [3]
     }
+  ],
+  "yesno": [
+    {
+      "question": "Is Russia the biggest country in the world?",
+      "valid": true 
+    }
   ]
 }
