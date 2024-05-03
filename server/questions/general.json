@@ -94,7 +94,12 @@
   "choices": [
     {
       "question": "Who wrote the play \"Hamlet\"?",
-      "choices": ["Ronald D. Eisenhower", "William Shakespeare", "Amadeus Mozart", "Winston Churchill"],
+      "choices": [
+        "Ronald D. Eisenhower",
+        "William Shakespeare",
+        "Amadeus Mozart",
+        "Winston Churchill"
+      ],
       "valid": [1]
     },
     {
@@ -104,7 +109,12 @@
     },
     {
       "question": "Who wrote the famous novel \"To Kill a Mockingbird\"?",
-      "choices": ["Ernest Hemingway", "Harper Lee", "F. Scott Fitzgerald", "J.D. Salinger"],
+      "choices": [
+        "Ernest Hemingway",
+        "Harper Lee",
+        "F. Scott Fitzgerald",
+        "J.D. Salinger"
+      ],
       "valid": [1]
     },
     {

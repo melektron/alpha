@@ -55,7 +55,7 @@
     {
       "question": "How many built-in keywords are in Python?",
       "choices": ["5", "84", "19", "36"],
-      "valid": [4]
+      "valid": [3]
     },
     {
       "question": "Which of those languages is compiled?",
@@ -71,6 +71,16 @@
         "int main {}"
       ],
       "valid": [2]
+    },
+    {
+      "question": "What git command is used for uploading changes to GitHub?",
+      "choices": [
+        "git commit",
+        "git add",
+        "git remote",
+        "git push"
+      ],
+      "valid": [3]
     }
   ],
   "yesno": [
