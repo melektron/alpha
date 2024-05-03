@@ -16,7 +16,7 @@
     "valid": [0]
     },
     {
-    "question": "What protocol is used for secure communication over a computer network?",
+    "question": "What is a secure communications Protocol?",
     "choices": ["HTTPS", "HTTP", "FTP", "SMTP"],
     "valid": [0]
     },
@@ -31,7 +31,7 @@
     "valid": [3]
     },
     {
-    "question": "What technology allows multiple devices to share a single public IP address?",
+    "question": "What allows multiple devices to share one public IP address?",
     "choices": ["NAT (Network Address Translation)", "DNS (Domain Name System)", "VPN (Virtual Private Network)", "DHCP (Dynamic Host Configuration Protocol)"],
     "valid": [0]
     },
@@ -41,7 +41,7 @@
     "valid": [0]
     },
     {
-    "question": "Which of the following is a common wireless encryption protocol?",
+    "question": "What is a common wireless encryption protocol?",
     "choices": ["WEP (Wired Equivalent Privacy)", "HTTPS (Hypertext Transfer Protocol Secure)", "TCP (Transmission Control Protocol)", "FTP (File Transfer Protocol)"],
     "valid": [0]
     },

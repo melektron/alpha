@@ -86,7 +86,7 @@ class QuestionsScreen(ctk.CTkFrame):
 
         self._question_title = ctk.CTkLabel(
             self._questions_box,
-            font=("Arial", 64),
+            font=("Arial", 48),
             text="Le Question",
         )
         self._question_title.grid(row=0, column=0)
@@ -421,6 +421,7 @@ class QuestionsScreen(ctk.CTkFrame):
             column=2,
             padx=100
         )
+        self._leaderboard_title.configure(text="Leaderboard")
         self.parent.game_done()
 
     def _update_animation(self) -> None:
