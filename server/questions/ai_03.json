@@ -1,0 +1,125 @@
+{
+    "text": [
+        {
+            "question": "What is the atomic number of carbon?",
+            "valid": [
+                "6"
+            ]
+        },
+        {
+            "question": "Name a noble gas element",
+            "valid": [
+                "helium",
+                "neon",
+                "argon",
+                "krypton",
+                "xenon",
+                "radon"
+            ],
+            "match_case": false
+        },
+        {
+            "question": "What is the chemical symbol for gold?",
+            "valid": [
+                "Au"
+            ]
+        },
+        {
+            "question": "How many elements are in the periodic table?",
+            "valid": [
+                "118"
+            ]
+        },
+        {
+            "question": "What is the unit of measurement for energy in chemistry?",
+            "valid": [
+                "joule",
+                "kJ"
+            ],
+            "match_case": false
+        }
+    ],
+    "choices": [
+        {
+            "question": "Which of the following is a strong acid?",
+            "choices": [
+                "HCl",
+                "H2O",
+                "NH3",
+                "NaOH"
+            ],
+            "valid": [
+                0
+            ]
+        },
+        {
+            "question": "What is the pH of a neutral solution?",
+            "choices": [
+                "7",
+                "10",
+                "5",
+                "1"
+            ],
+            "valid": [
+                0
+            ]
+        },
+        {
+            "question": "Which subatomic particle has a positive charge?",
+            "choices": [
+                "proton",
+                "electron",
+                "neutron"
+            ],
+            "valid": [
+                0
+            ]
+        },
+        {
+            "question": "What is the process of a substance changing from a solid to a gas without becoming a liquid first called?",
+            "choices": [
+                "sublimation",
+                "condensation",
+                "vaporization",
+                "fusion"
+            ],
+            "valid": [
+                0
+            ]
+        },
+        {
+            "question": "Which of the following is a transition metal?",
+            "choices": [
+                "iron",
+                "sodium",
+                "potassium",
+                "calcium"
+            ],
+            "valid": [
+                0
+            ]
+        }
+    ],
+    "yesno": [
+        {
+            "question": "Is water a compound?",
+            "valid": true
+        },
+        {
+            "question": "Does the atomic number represent the number of protons in an atom?",
+            "valid": true
+        },
+        {
+            "question": "Is sodium a noble gas?",
+            "valid": false
+        },
+        {
+            "question": "Is carbon dioxide a greenhouse gas?",
+            "valid": true
+        },
+        {
+            "question": "Can elements combine to form compounds?",
+            "valid": true
+        }
+    ]
+}

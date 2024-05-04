@@ -1,0 +1,125 @@
+{
+    "text": [
+        {
+            "question": "What is the chemical symbol for Gold?",
+            "valid": [
+                "Au"
+            ],
+            "match_case": false
+        },
+        {
+            "question": "What gas is the most abundant in our atmosphere?",
+            "valid": [
+                "Nitrogen",
+                "N2"
+            ],
+            "match_case": false
+        },
+        {
+            "question": "Name the scientist who developed the Periodic Table",
+            "valid": [
+                "Mendeleev",
+                "Dmitri Mendeleev"
+            ],
+            "match_case": false
+        },
+        {
+            "question": "The pH scale ranges from 0 to what number?",
+            "valid": [
+                "14"
+            ],
+            "match_case": false
+        },
+        {
+            "question": "What do you call a substance that speeds up a chemical reaction without undergoing any permanent chemical change?",
+            "valid": [
+                "Catalyst"
+            ],
+            "match_case": false
+        }
+    ],
+    "choices": [
+        {
+            "question": "Which of the following is not a noble gas?",
+            "choices": [
+                "Helium",
+                "Neon",
+                "Argon",
+                "Oxygen"
+            ],
+            "valid": [
+                3
+            ]
+        },
+        {
+            "question": "What element is represented by the letter 'K' on the periodic table?",
+            "choices": [
+                "Krypton",
+                "Kryptonium",
+                "Potassium",
+                "Kalium"
+            ],
+            "valid": [
+                2
+            ]
+        },
+        {
+            "question": "What type of bond involves the transfer of electrons?",
+            "choices": [
+                "Ionic",
+                "Covalent",
+                "Hydrogen",
+                "Metallic"
+            ],
+            "valid": [
+                0
+            ]
+        },
+        {
+            "question": "What is the basic unit of matter?",
+            "choices": [
+                "Atom",
+                "Molecule",
+                "Electron",
+                "Protein"
+            ],
+            "valid": [
+                0
+            ]
+        },
+        {
+            "question": "Which among the following is not a halogen?",
+            "choices": [
+                "Fluorine",
+                "Chlorine",
+                "Bromine",
+                "Oxygen"
+            ],
+            "valid": [
+                3
+            ]
+        }
+    ],
+    "yesno": [
+        {
+            "question": "Does the number of protons determine the element?",
+            "valid": true
+        },
+        {
+            "question": "Is water (H2O) an organic compound?",
+            "valid": false
+        },
+        {
+            "question": "Can solute be dissolved in a solvent?",
+            "valid": true
+        },
+        {
+            "question": "Is Bleach (NaClO) an acid?",
+            "valid": false
+        },
+        {
+            "question": "Does the atomic number also represent the number of electrons in an atom?",
+            "valid": true
+        }
+    ]
+}
