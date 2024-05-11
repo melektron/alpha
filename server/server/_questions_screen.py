@@ -8,6 +8,7 @@ Author:
 Nilusink
 """
 from ._questions_master import Question
+from ._results_canvas import ResultsCanvas
 from ._client import CLIENTS
 from ._server import Server
 from ._audio import AUDIO
@@ -109,7 +110,7 @@ class QuestionsScreen(ctk.CTkFrame):
             self._questions_box,
             text="Skip",
             font=("Arial", 48),
-            command=lambda: self._synchronize(self.show_leaderboard())
+            command=lambda: CLIENTS.skip_question()
         )
         self._skip_button.grid(
             row=0,
@@ -165,6 +166,49 @@ class QuestionsScreen(ctk.CTkFrame):
             corner_radius=25,
         )
         self._choice_widgets: list[ctk.CTkLabel] = []
+        
+        # results frame
+        self._results_box = ctk.CTkFrame(self)
+
+        self._results_box.grid_rowconfigure(0, weight=1)
+        self._results_box.grid_rowconfigure(1, weight=3)
+        self._results_box.grid_columnconfigure(0, weight=1)
+
+        self._results_title = ctk.CTkLabel(
+            self._results_box,
+            text="Results",
+            font=("Arial", 64),
+        )
+        self._results_title.grid(
+            row=0,
+            column=0,
+            sticky="nsew"
+        )
+
+        self._show_leaderboard_button = ctk.CTkButton(
+            self._results_box,
+            text="Show Leaderboard",
+            font=("Arial", 48),
+            command=lambda: self._synchronize(self.show_leaderboard())
+        )
+        self._show_leaderboard_button.grid(
+            row=0,
+            column=1,
+            padx=100
+        )
+
+        self._results_canvas = ResultsCanvas(
+            self._results_box,
+            self._loop
+        )
+        self._results_canvas.grid(
+            row=1,
+            column=0,
+            columnspan=2,
+            sticky="nsew",
+            padx=40,
+            pady=50
+        )
 
         # leader board
         self._leaderboard_box = ctk.CTkFrame(self)
@@ -402,25 +446,53 @@ class QuestionsScreen(ctk.CTkFrame):
             for _ in range(new_answers):
                 AUDIO.play_answer_submitted_effect()
 
-        await CLIENTS.send_statistics()
-        await self.show_leaderboard()
-
         # stop the question sound
-        await AUDIO.end_question_sound()
+        self._synchronize(AUDIO.end_question_sound())
 
-    async def show_leaderboard(self) -> None:
+        await CLIENTS.send_statistics()
+        await self.show_results()
+
+    async def show_results(self) -> None:
         """
-        shows the correct answer to the question
+        shows the correct answer to the question and how players answered
         """
         # make sure, the question is done
         CLIENTS.skip_question()
 
         # adjust ui
         self._questions_box.grid_forget()
-
-        # it should never be called from the waiting screen, but who tf
+        # it should never be called from the waiting screen and others, but who tf
         # knows what future me is going to do ...
         self._waiting_box.grid_forget()
+        self._leaderboard_box.grid_forget()
+
+        self._results_box.grid(row=0, column=0, sticky="nsew")
+
+        # remove any possible results objects from last question
+        self._results_canvas.remove_all_sprites()
+            # display the results objects of the new question if any answers were submitted
+        if len(CLIENTS.answer_log) > 0:
+            if self._current_question["question_type"] == 0: # text
+                self._results_canvas.display_word_cloud(CLIENTS.answer_log)
+            elif self._current_question["question_type"] == 1: # yesno
+                self._results_canvas.display_word_cloud(CLIENTS.answer_log)
+            elif self._current_question["question_type"] == 2: # multi
+                self._results_canvas.display_word_cloud(CLIENTS.answer_log)
+
+    async def show_leaderboard(self) -> None:
+        """
+        shows the five best players
+        """
+        # make sure, the question is done (should never happen)
+        CLIENTS.skip_question()
+
+        # adjust ui
+        self._results_box.grid_forget()
+
+        # it should never be called from the waiting screen and others, but who tf
+        # knows what future me is going to do ...
+        self._waiting_box.grid_forget()
+        self._questions_box.grid_forget()
 
         self._leaderboard_box.grid(row=0, column=0, sticky="nsew")
 

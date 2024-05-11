@@ -50,6 +50,7 @@ class Clients:
         self._question_time = 20
         self._current_timeout = ...
         self.__skip_question: bool = False
+        self._answer_log: list[str] = []
 
     def check_username(self, username: str) -> bool:
         """
@@ -78,6 +79,7 @@ class Clients:
         """
         futures = []
         self._answered.clear()
+        self._answer_log.clear()
         self.__skip_question = False
         for client in self._clients:
             futures.append(client.ask_question(question, self._qid))
@@ -173,7 +175,7 @@ class Clients:
         """
         self.__skip_question = True
 
-    def answer_question(self, qid: int, answer: str) -> bool:
+    def answer_question(self, qid: int, answer: str | bool | int) -> bool:
         """
         answer a specific question
 
@@ -196,8 +198,11 @@ class Clients:
             return False
 
         match question["question"]["question_type"]:
-            case 0:
+            case 0: # text
                 answer = answer.lstrip().strip()
+                # log answer value
+                self._answer_log.append(answer)
+
                 if question["question"]["match_case"]:
                     answered = answer in question["question"]["valid"]
 
@@ -206,11 +211,15 @@ class Clients:
                         a.lower() for a in question["question"]["valid"]
                     ]
 
-            case 1:
+            case 1: # yesno
                 answered = answer == question["question"]["valid"]
+                # log answer value
+                self._answer_log.append("Yes" if answered else "No")
 
-            case 2:
+            case 2: # choice
                 answered = answer in question["question"]["valid"]
+                # log answer value
+                self._answer_log.append(question["question"]["choices"][answer])
 
         # calculate points
         points = 0
@@ -239,6 +248,14 @@ class Clients:
         ranking = sorted(ranking, key=lambda _: _[0], reverse=True)
 
         return ranking
+
+    @property
+    def answer_log(self) -> list[str]:
+        """
+        list of all submitted answers in string form 
+        (either the entered text, "Yes"/"No", or the choice text)
+        """
+        return self._answer_log
 
     async def send_statistics(self) -> None:
         """
