@@ -82,8 +82,9 @@ class QuestionsScreen(ctk.CTkFrame):
         # actual question
         self._questions_box = ctk.CTkFrame(self)
 
-        self._questions_box.grid_rowconfigure(0, weight=1)
+        self._questions_box.grid_rowconfigure(0, weight=2)
         self._questions_box.grid_rowconfigure(1, weight=3)
+        self._questions_box.grid_rowconfigure(2, weight=3)
         self._questions_box.grid_columnconfigure(0, weight=1)
 
         self._question_title = ctk.CTkLabel(
@@ -114,6 +115,30 @@ class QuestionsScreen(ctk.CTkFrame):
             row=0,
             column=2,
             padx=100
+        )
+
+        self._time_left_label = ctk.CTkLabel(
+            self._questions_box,
+            text="",
+            font=("Arial", 32),
+        )
+        self._set_time_left(0)
+        self._time_left_label.grid(
+            row=1,
+            column=2,
+            sticky="nsew"
+        )
+
+        self._answers_label = ctk.CTkLabel(
+            self._questions_box,
+            text="",
+            font=("Arial", 32),
+        )
+        self._set_nr_answers(0)
+        self._answers_label.grid(
+            row=2,
+            column=2,
+            sticky="nsew"
         )
 
         # text answered questions
@@ -234,6 +259,12 @@ class QuestionsScreen(ctk.CTkFrame):
                 pady=30,
                 sticky="nsew"
             )
+    
+    def _set_time_left(self, s: int) -> None:
+        self._time_left_label.configure(text=f"{s}s\nleft")
+
+    def _set_nr_answers(self, s: int) -> None:
+        self._answers_label.configure(text=f"{s}\nanswers")
 
     def grid(self, **kwargs):
         # override parent grid method to call new_question right after
@@ -281,6 +312,7 @@ class QuestionsScreen(ctk.CTkFrame):
                 row=1,
                 column=0,
                 columnspan=2,
+                rowspan=2,
                 sticky="nsew",
                 padx=40,
                 pady=50
@@ -292,7 +324,8 @@ class QuestionsScreen(ctk.CTkFrame):
             self._text_question_box.grid(
                 row=1,
                 column=0,
-                columnspan=3,
+                columnspan=2,
+                rowspan=2,
                 sticky="nsew",
                 padx=40,
                 pady=50
@@ -303,7 +336,8 @@ class QuestionsScreen(ctk.CTkFrame):
             self._choice_box.grid(
                 row=1,
                 column=0,
-                columnspan=3,
+                columnspan=2,
+                rowspan=2,
                 sticky="nsew",
                 padx=40,
                 pady=50
@@ -355,10 +389,16 @@ class QuestionsScreen(ctk.CTkFrame):
         # start question sound
         AUDIO.start_question_sound()
 
+        self._set_nr_answers(0)
+        self._set_time_left(0)
+
         await CLIENTS.ask_question(question)
+
         async for nr_answers, new_answers, time_left in CLIENTS.wait_question_done():
-            #ic(update)
-            ic(f"{time_left=}, {nr_answers=}, {new_answers=}")
+            # update the status on the screen
+            self._set_time_left(time_left)
+            self._set_nr_answers(nr_answers)
+            # play sound for each new answer that was submitted
             for _ in range(new_answers):
                 AUDIO.play_answer_submitted_effect()
 

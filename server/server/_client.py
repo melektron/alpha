@@ -121,12 +121,11 @@ class Clients:
         
         while self._question_time - (perf_counter() - self._current_timeout) > 0:
 
-            nr_answers = 0
+            nr_answers = len(self._answered)
             new_answers = 0
             # if nr of answers changed, update that
-            if last_nr_answers != len(self._answered):
-                new_answers = len(self._answered) - last_nr_answers
-                nr_answers = len(self._answered)
+            if last_nr_answers != nr_answers:
+                new_answers = nr_answers - last_nr_answers
                 last_nr_answers = nr_answers
             # update time left
             time_left: float = self._question_time - (perf_counter() - self._current_timeout)
