@@ -22,6 +22,7 @@ const socket = useTestSocket();
 const communication_log_container = ref<HTMLDivElement[] | null>(null);
 const send_buffer_input_element = ref<InstanceType<typeof InputText> | null>(null);
 
+const server_addr = ref("ws://localhost:1647/");
 const auto_scroll = ref(true);
 const keep_buffer = ref(false);
 const send_buffer = ref("");
@@ -32,15 +33,15 @@ function onCommand(command: string) {
     console.log(command);
     switch (command) {
         case "connect":
-            socket.openConnection();
+            socket.openConnection(server_addr.value);
             TerminalService.emit("response", "Connecting ...");
             break;
         case "disconnect":
-            socket.openConnection();
+            socket.openConnection(server_addr.value);
             TerminalService.emit("response", "Disconnecting ...");
             break;
         case "auth":
-            socket.openConnection();
+            socket.openConnection(server_addr.value);
             break;
         case "a":
             socket.communication_log.push({ data: "a", type: "ctrl" });
@@ -128,7 +129,8 @@ watch(socket.communication_log, async () => {
                 <span class="note-connected" v-if="socket.socket_state === SocketState.CONNECTED"> Connected </span>
             </template>
             <template #end>
-                <Button v-if="socket.socket_state === SocketState.DISCONNECTED" @click="socket.openConnection()"
+                <InputText v-model="server_addr" style="margin-right: 20px; width: 16rem;" placeholder="Server Address" />
+                <Button v-if="socket.socket_state === SocketState.DISCONNECTED" @click="socket.openConnection(server_addr)"
                     severity="success">
                     Connect
                 </Button>

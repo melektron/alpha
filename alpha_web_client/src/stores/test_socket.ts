@@ -65,14 +65,15 @@ export const useTestSocket = defineStore("test_socket", () => {
         });
     }
 
-    function openConnection() {
+    function openConnection(addr: string) {
         if (socket_state.value !== SocketState.DISCONNECTED && socket !== null) {
             socket.close(0);
         }
 
         socket_state.value = SocketState.CONNECTING;
         //socket = new WebSocket("ws://localhost:1647/");
-        socket = new WebSocket("ws://10.10.217.208:1647/");
+        //socket = new WebSocket("ws://10.10.217.208:1647/");
+        socket = new WebSocket(addr);
         
         socket.onopen = onOpen;
         socket.onmessage = onMessage;
