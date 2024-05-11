@@ -14,6 +14,25 @@ import random
 import json
 import os
 
+class TextQuestion(tp.TypedDict):
+    question_type: tp.Literal[0]
+    question: str
+    valid: list[str]
+    match_case: bool
+
+class YesNoQuestion(tp.TypedDict):
+    question_type: tp.Literal[1]
+    question: str
+    valid: bool
+
+class ChoiceQuestion(tp.TypedDict):
+    question_type: tp.Literal[2]
+    question: str
+    choices: list[str]
+    valid: list[int]
+
+Question = TextQuestion | YesNoQuestion | ChoiceQuestion
+
 
 class _QuestionsMaster:
     __instance = ... 
@@ -91,13 +110,13 @@ class _QuestionsMaster:
             self,
             n_questions: int = 1,
             question_types: tuple[str, ...] = ...
-    ) -> list[dict]:
+    ) -> list[Question]:
         """
         selects n_questions questions from all selected pools
         """
         # question_types = ("yesno",)
         if question_types is ...:
-            question_pool = [
+            question_pool: list[Question] = [
                 {
                     "question_type": {
                         "text": 0,
@@ -110,7 +129,7 @@ class _QuestionsMaster:
 
         else:
             ic(question_types)
-            question_pool = []
+            question_pool: list[Question] = []
 
             if "text" in question_types:
                 question_pool.extend([{

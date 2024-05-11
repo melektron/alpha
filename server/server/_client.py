@@ -9,7 +9,7 @@ Nilusink
 """
 from websockets.exceptions import ConnectionClosedOK, ConnectionClosedError
 from websockets.legacy.server import WebSocketServerProtocol
-from ._questions_master import QuestionsMaster
+from ._questions_master import QuestionsMaster, Question
 from time import perf_counter
 from icecream import ic
 import typing as tp
@@ -18,6 +18,19 @@ import asyncio
 import socket
 import json
 
+
+class UnansweredQ(tp.TypedDict):
+    question: Question
+    client: "Client"
+    time: float
+    time_to_answer: int
+
+class AnsweredQ(tp.TypedDict):
+    question: Question
+    id: int
+    client: "Client"
+    points: int
+    result: bool
 
 class Clients:
     __instance = ...
@@ -32,8 +45,8 @@ class Clients:
     def __init__(self) -> None:
         self._clients: list["Client"] = []
         self._qid = 0
-        self._unanswered = {}
-        self._answered = []
+        self._unanswered: dict[int, UnansweredQ] = {}
+        self._answered: list[AnsweredQ] = []
         self._question_time = 20
         self._current_timeout = ...
         self.__skip_question: bool = False
@@ -59,7 +72,7 @@ class Clients:
         if client in self._clients:
             self._clients.remove(client)
 
-    async def ask_question(self, question: dict) -> None:
+    async def ask_question(self, question: Question) -> None:
         """
         ask a question to all clients and handles scores
         """
@@ -92,21 +105,49 @@ class Clients:
 
         await asyncio.gather(*futures)
 
-    async def question_done(self) -> None:
+    async def wait_question_done(self) -> tp.AsyncIterator[tuple[
+        int, int, int
+    ]]:
         """
-        waits until the question is over
+        waits until the question is over.
+        yields the time left, number of answers and added answers when 
+        changed during waiting
         """
+        last_nr_answers = 0
+        # initial yield to update UI
+        yield (last_nr_answers, 0, self._question_time - (perf_counter() - self._current_timeout))
+
         # #websockets.exceptions.ConnectionClosedError
-        while perf_counter() - self._current_timeout < self._question_time:
-            # all clients done
+        
+        while self._question_time - (perf_counter() - self._current_timeout) > 0:
+
+            nr_answers = 0
+            new_answers = 0
+            # if nr of answers changed, update that
+            if last_nr_answers != len(self._answered):
+                new_answers = len(self._answered) - last_nr_answers
+                nr_answers = len(self._answered)
+                last_nr_answers = nr_answers
+            # update time left
+            time_left: float = self._question_time - (perf_counter() - self._current_timeout)
+            if time_left < 0:
+                time_left = 0
+            # yield the update
+            yield (
+                nr_answers,     # nr of answers
+                new_answers,    # nr of answers delta
+                int(time_left)  # time left (in seconds)
+            )
+
+            # if all clients are done, exit
             if len(self._unanswered) == 0:
                 break
 
-            # check, if the question was skipped
+            # if the question was skipped, exit
             elif self.__skip_question:
                 break
 
-            await asyncio.sleep(.5)
+            await asyncio.sleep(.2)
 
         # remove any unanswered questions
         futures = []
@@ -158,7 +199,6 @@ class Clients:
         match question["question"]["question_type"]:
             case 0:
                 answer = answer.lstrip().strip()
-
                 if question["question"]["match_case"]:
                     answered = answer in question["question"]["valid"]
 
@@ -189,6 +229,7 @@ class Clients:
             "points": points,
             "result": answered
         })
+
         return True
 
     def get_leaderboard(self) -> list[tuple[int, str]]:

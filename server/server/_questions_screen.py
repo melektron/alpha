@@ -7,10 +7,12 @@ It's literally in the file name, what did you expect?
 Author:
 Nilusink
 """
+from ._questions_master import Question
 from ._client import CLIENTS
 from ._server import Server
 from ._audio import AUDIO
 import customtkinter as ctk
+from icecream import ic
 import typing as tp
 import asyncio
 import math
@@ -41,7 +43,7 @@ class QuestionsScreen(ctk.CTkFrame):
         self.parent = parent
         self._loop = event_loop
         self._server: Server = server
-        self._current_question: dict = ...
+        self._current_question: Question | None = None
 
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
@@ -252,7 +254,7 @@ class QuestionsScreen(ctk.CTkFrame):
         """
         a new question appeared
         """
-        self._current_question: dict = ...
+        self._current_question = None
 
         # get new question
         question = self._server.next_question()
@@ -354,7 +356,12 @@ class QuestionsScreen(ctk.CTkFrame):
         AUDIO.start_question_sound()
 
         await CLIENTS.ask_question(question)
-        await CLIENTS.question_done()
+        async for nr_answers, new_answers, time_left in CLIENTS.wait_question_done():
+            #ic(update)
+            ic(f"{time_left=}, {nr_answers=}, {new_answers=}")
+            for _ in range(new_answers):
+                AUDIO.play_answer_submitted_effect()
+
         await CLIENTS.send_statistics()
         await self.show_leaderboard()
 

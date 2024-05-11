@@ -1,4 +1,4 @@
-from ._questions_master import QuestionsMaster
+from ._questions_master import QuestionsMaster, Question
 from ._client import Client, CLIENTS, WsClient
 from websockets.legacy.server import WebSocketServerProtocol
 from websockets.server import serve
@@ -7,6 +7,7 @@ from icecream import ic
 import aioconsole
 import asyncio
 import socket
+from types import EllipsisType
 
 
 HOST = '0.0.0.0'
@@ -42,7 +43,7 @@ class Server:
         # create questions master
         self.qmaster = QuestionsMaster
         self.qmaster.load_from_file("./questions/general.json")
-        self._questions = ...
+        self._questions: list[Question] | None = None
         self._current_question = -1
 
         # async magic
@@ -128,13 +129,15 @@ class Server:
         )
         self._current_question = 0
 
-    def next_question(self) -> dict | None:
+    def next_question(self) -> Question | None:
         """
         get the next question from the queue
         """
+        if self._questions is None:
+            return None
+        
         try:
             out = self._questions[self._current_question]
-
         except IndexError:
             return None
 
@@ -187,7 +190,7 @@ class Server:
 
                 for question in self._questions:
                     await CLIENTS.ask_question(question)
-                    await CLIENTS.question_done()
+                    await CLIENTS.wait_question_done()
                     await CLIENTS.send_statistics()
                     await aioconsole.ainput('Press enter to profit! ')
 
