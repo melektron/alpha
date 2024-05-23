@@ -20,8 +20,8 @@ class Audio:
         pygame.mixer.init()
 
         self._crash = pygame.mixer.Sound("sound/acoustic-classic-crash-2.wav")
-        self._snap = pygame.mixer.Sound("sound/acoustic-snap-one-shor_90bpm.wav")
-        self._plop = pygame.mixer.Sound("sound/bubble_Gsharp_major.wav")
+        self._snap = pygame.mixer.Sound("sound/acoustic-snap-one-shor_90bpm_amplified.wav")
+        self._plop = pygame.mixer.Sound("sound/bubble_Gsharp_major_amplified.wav")
         self._connect_loopable = pygame.mixer.Sound("sound/connect_loopable.wav")
         self._question_loop_1 = pygame.mixer.Sound("sound/question_loop_1.wav")
         self._question_loop_2 = pygame.mixer.Sound("sound/question_loop_2.wav")
@@ -37,7 +37,7 @@ class Audio:
     
     def start_connect_sound(self) -> None:
         self._connect_loopable.play(loops=-1)   # loop indefinitely
-        self._connect_loopable.set_volume(0.8)
+        #self._connect_loopable.set_volume(0.8)
     
     async def end_connect_sound(self) -> None:
         self._connect_loopable.fadeout(1000)
@@ -57,7 +57,7 @@ class Audio:
         async def play_random(possible: Sequence[pygame.mixer.Sound]) -> None:
             sound = random.sample(possible, 1)[0]
             sound.play()
-            sound.set_volume(0.8)
+            #sound.set_volume(0.8)
             await asyncio.sleep(sound.get_length())
         
         async def run_loop() -> None:
@@ -94,7 +94,7 @@ class Audio:
     def play_answer_submitted_effect(self) -> None:
         snd = random.sample((self._plop, self._snap), 1)[0]
         snd.play()
-        snd.set_volume(1.0)
+        #snd.set_volume(1.0)
 
 
 AUDIO = Audio()
