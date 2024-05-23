@@ -469,15 +469,27 @@ class QuestionsScreen(ctk.CTkFrame):
         self._results_box.grid(row=0, column=0, sticky="nsew")
 
         # remove any possible results objects from last question
-        self._results_canvas.remove_all_sprites()
-            # display the results objects of the new question if any answers were submitted
+        self._results_canvas._remove_all_sprites()
+
+        # get the correct answer
+        valid_answers: list[str] = []
+        if self._current_question["question_type"] == 0: # text
+            valid_answers = self._current_question["valid"]
+        elif self._current_question["question_type"] == 1: # yesno
+            valid_answers = ["Yes" if self._current_question["valid"] else "No"]
+        elif self._current_question["question_type"] == 2: # multi
+            valid_answers = [a for i, a in enumerate(self._current_question["choices"]) if i in self._current_question["valid"]]
+
+        # display the results objects of the new question if any answers were submitted
         if len(CLIENTS.answer_log) > 0:
             if self._current_question["question_type"] == 0: # text
-                self._results_canvas.display_word_cloud(CLIENTS.answer_log)
+                self._results_canvas.display_word_cloud(CLIENTS.answer_log, valid_answers)
             elif self._current_question["question_type"] == 1: # yesno
-                self._results_canvas.display_word_cloud(CLIENTS.answer_log)
+                self._results_canvas.display_bar_graph(CLIENTS.answer_log, ["Yes", "No"], valid_answers)
             elif self._current_question["question_type"] == 2: # multi
-                self._results_canvas.display_word_cloud(CLIENTS.answer_log)
+                self._results_canvas.display_bar_graph(CLIENTS.answer_log, self._current_question["choices"], valid_answers)
+        else:
+            self._results_canvas.display_sad_face(valid_answers)
 
     async def show_leaderboard(self) -> None:
         """
