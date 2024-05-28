@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/vocabulary.css') }}">
+    <script src="{{ url_for('static', filename='js/vocabulary.js') }}"></script>
+{% endblock %}
+
+{% block body %}
+    <div id="words">
+
+    </div>
+    <script>
+        let buttonStats = {};
+
+        function toggleButtonHide(id) {
+            if (!buttonStats[id]) {
+                buttonStats[id] = true;
+                document.getElementById(id).style.color = "white";
+            } else {
+                buttonStats[id] = false;
+                document.getElementById(id).style.color = "transparent";
+            }
+        }
+
+        function startStuff() {
+            let req = `/compose?nr={{ n }}&alts=0&sets={{ s }}`;
+            console.log(req);
+            fetch(req)
+                .then((response) => {
+                    return response.json();
+                })
+                .then((data) => {
+                    console.log(data);
+                    let out = ``
+                    for (const i in data) {
+                        console.log({{swapflag}});
+                        const correctleft = ({{swapflag}} ? data[i].langb.correct : data[i].langa.correct);
+                        const correctright = ({{swapflag}} ? data[i].langa.correct : data[i].langb.correct);
+                        out += `
+                            <div class=wordLine>
+                                <label class="word" id="${i}a">${correctleft}</label>
+                                <div style="height: 100%; width: 2px; background: #666"></div>
+                                <button class="word bside" id="${i}b" onclick=toggleButtonHide("${i}b")>${correctright}</button>
+                            </div>
+                        `
+                    }
+                    document.getElementById("words").innerHTML = out;
+                })
+        }
+
+        startStuff()
+    </script>
+{% endblock %}

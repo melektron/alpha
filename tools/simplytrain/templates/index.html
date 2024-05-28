@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+{% endblock %}
+
+{% block body %}
+    <form id="setsBox">
+
+    </form>
+    <div id="startBox">
+        <label style="color: white; font-size: 2em; font-weight: bold">Options</label>
+
+        <div class="swapthingyBox">
+            <input type="checkbox" id="swap">
+            <label for="swap" class="swapthingy">Swap</label>
+        </div>
+        <div class="infotext">
+            Default direction: English -> German <br>
+            Swapped direction: German -> English
+        </div>
+
+        <form>
+            <label style="color: white">
+                How many vocabs? (<span id="nr_avail_words">0</span> available)
+                <input type="text" id="howMany" value="10">
+            </label>
+        </form>
+
+        <button id="startButton" onclick="startStuff()">Start</button>
+    </div>
+    <script>
+        fetch("/sets")
+            .then((response) => {
+                return response.json()
+            })
+            .then((data) => {
+                data.sort();
+                console.log(data);
+                let out = ``;
+                for (const i in data) {
+                    console.log(i, data[i]);
+                    out += `
+                    <div class="checkerBox">
+                        <input type="checkbox" id="${i}" class="setButton" onclick="onSelectionChanged()">
+                        <label for="${i}" class="checkLabel">${data[i]}</label>
+                    </div>
+                    `
+                }
+                console.log("done")
+                document.getElementById("setsBox").innerHTML = out;
+            })
+    </script>
+{% endblock %}
