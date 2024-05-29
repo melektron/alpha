@@ -1,5 +1,7 @@
 # AI parameters.
 
+This folder contains AI generated questions, along with the parameters in this file to get the desired results.
+
 ## GPT4
 
 Very creative and detailed GPT 4 Parameters:
