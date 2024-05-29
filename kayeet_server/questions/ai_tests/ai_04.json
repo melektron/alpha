@@ -1,0 +1,124 @@
+// GPT 4
+{
+    "text": [
+        {
+            "question": "What’s the chemical symbol for Iron?",
+            "valid": [
+                "Fe"
+            ],
+            "match_case": false
+        },
+        {
+            "question": "What's the chemical formula for water?",
+            "valid": [
+                "H2O"
+            ],
+            "match_case": true
+        },
+        {
+            "question": "What element has the atomic number 1?",
+            "valid": [
+                "Hydrogen"
+            ],
+            "match_case": false
+        },
+        {
+            "question": "What element is represented by the symbol 'O'?",
+            "valid": [
+                "Oxygen"
+            ],
+            "match_case": true
+        },
+        {
+            "question": "What is the term for a substance that cannot be separated into simpler substances?",
+            "valid": [
+                "Element"
+            ],
+            "match_case": false
+        }
+    ],
+    "choices": [
+        {
+            "question": "Which of the following is not a noble gas?",
+            "choices": [
+                "Helium",
+                "Neon",
+                "Boron",
+                "Argon"
+            ],
+            "valid": [
+                2
+            ]
+        },
+        {
+            "question": "What state of matter has a definite volume but not a definite shape?",
+            "choices": [
+                "Solid",
+                "Liquid",
+                "Gas",
+                "Plasma"
+            ],
+            "valid": [
+                1
+            ]
+        },
+        {
+            "question": "What is the main gas found in the air we breathe?",
+            "choices": [
+                "Oxygen",
+                "Carbon Dioxide",
+                "Nitrogen",
+                "Hydrogen"
+            ],
+            "valid": [
+                2
+            ]
+        },
+        {
+            "question": "Which element is needed in plants for photosynthesis?",
+            "choices": [
+                "Iron",
+                "Nitrogen",
+                "Zinc",
+                "Carbon"
+            ],
+            "valid": [
+                3
+            ]
+        },
+        {
+            "question": "What is the chemical symbol for gold?",
+            "choices": [
+                "Go",
+                "Gd",
+                "Au",
+                "Ga"
+            ],
+            "valid": [
+                2
+            ]
+        }
+    ],
+    "yesno": [
+        {
+            "question": "Is Sodium (Na) a metal?",
+            "valid": true
+        },
+        {
+            "question": "Does a covalent bond involve transfer of electrons?",
+            "valid": false
+        },
+        {
+            "question": "Is Sodium Chloride (NaCl) an ionic compound?",
+            "valid": true
+        },
+        {
+            "question": "Do elements in the same group of the periodic table have similar properties?",
+            "valid": true
+        },
+        {
+            "question": "Is the atomic mass of Carbon-12 exactly 12?",
+            "valid": true
+        }
+    ]
+}
