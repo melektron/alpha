@@ -13,7 +13,7 @@ import csv
 import os
 
 
-CONTENT_DIR = "./content/240609_4AHEL_VOC_TEST_2"
+CONTENT_DIR = "./content/241130_Felix_Latein"
 
 
 class WordStructure(TypedDict):
