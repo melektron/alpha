@@ -1,0 +1,124 @@
+// GPT 3.5, simpler system prompt
+{
+    "text": [
+        {
+            "question": "What do you call the process of a solid changing directly to a gas?",
+            "valid": [
+                "sublimation"
+            ],
+            "match_case": true
+        },
+        {
+            "question": "Name the unit used to measure the amount of a substance in chemistry.",
+            "valid": [
+                "mole"
+            ],
+            "match_case": false
+        },
+        {
+            "question": "In a chemical reaction, what do we call substances that are formed as a result of the reaction?",
+            "valid": [
+                "products"
+            ],
+            "match_case": true
+        },
+        {
+            "question": "What is the lightest element on the periodic table?",
+            "valid": [
+                "hydrogen"
+            ],
+            "match_case": true
+        },
+        {
+            "question": "What type of bond involves the sharing of electrons between atoms?",
+            "valid": [
+                "covalent"
+            ],
+            "match_case": true
+        }
+    ],
+    "choices": [
+        {
+            "question": "Which of the following is a noble gas?",
+            "choices": [
+                "Oxygen",
+                "Neon",
+                "Chlorine",
+                "Sodium"
+            ],
+            "valid": [
+                1
+            ]
+        },
+        {
+            "question": "Which of these is a strong acid?",
+            "choices": [
+                "HCl",
+                "NaOH",
+                "NH3",
+                "H2O"
+            ],
+            "valid": [
+                0
+            ]
+        },
+        {
+            "question": "What is the chemical symbol for iron?",
+            "choices": [
+                "I",
+                "Fe",
+                "Ir",
+                "Io"
+            ],
+            "valid": [
+                1
+            ]
+        },
+        {
+            "question": "Which compound is commonly known as baking soda?",
+            "choices": [
+                "Sodium chloride",
+                "Sodium bicarbonate",
+                "Potassium chloride",
+                "Calcium carbonate"
+            ],
+            "valid": [
+                1
+            ]
+        },
+        {
+            "question": "What causes water to have a higher boiling point than expected?",
+            "choices": [
+                "High surface tension",
+                "Presence of impurities",
+                "Ionic bonding",
+                "Covalent bonding"
+            ],
+            "valid": [
+                1
+            ]
+        }
+    ],
+    "yesno": [
+        {
+            "question": "Is helium a noble gas?",
+            "valid": true
+        },
+        {
+            "question": "Can elements be broken down into simpler substances by ordinary chemical reactions?",
+            "valid": true
+        },
+        {
+            "question": "Does a catalyst affect the equilibrium position of a reversible reaction?",
+            "valid": false
+        },
+        {
+            "question": "Can an acid turn blue litmus paper red?",
+            "valid": true
+        },
+        {
+            "question": "Are ionic compounds made up of electrically charged particles?",
+            "valid": true
+        }
+    ]
+}

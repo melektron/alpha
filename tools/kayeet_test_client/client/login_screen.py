@@ -1,0 +1,191 @@
+"""
+login_screen.py
+11.04.2024
+
+the connection and login screens
+
+Author:
+Nilusink
+"""
+from CTkMessagebox import CTkMessagebox
+from .client_comms import Client
+import customtkinter as ctk
+import typing as tp
+import asyncio
+
+
+class LoginScreen(ctk.CTkFrame):
+    def __init__(
+            self,
+            parent,
+            client: Client,
+            event_loop: asyncio.AbstractEventLoop,
+            done_callback: tp.Callable[[], None],
+            *args,
+            **kwargs
+    ) -> None:
+        super().__init__(
+            parent,
+            *args,
+            fg_color="#2d0e5b",
+            corner_radius=0,
+            border_width=0,
+            **kwargs
+        )
+
+        self._client = client
+        self._loop = event_loop
+        self._callback = done_callback
+
+        self.grid_rowconfigure((0, 2), weight=4)
+        self.grid_columnconfigure((0, 2), weight=4)
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_columnconfigure(1, weight=1)
+
+        self.centerer = ctk.CTkFrame(self, fg_color="transparent")
+        self.centerer.grid(row=1, column=1, sticky="nsew")
+
+        self.centerer.grid_rowconfigure((0, 1), weight=1)
+        self.centerer.grid_columnconfigure(0, weight=1)
+
+        # logo
+        ctk.CTkLabel(
+            self.centerer,
+            text="KaYeet!",
+            fg_color="transparent",
+            font=("Arial", 64, "bold")
+        ).grid(
+            row=0, column=0, sticky="nsew", pady=40
+        )
+
+        # Login Box
+        login_box = ctk.CTkFrame(
+            self.centerer,
+            fg_color="#ffffff",
+            corner_radius=10
+        )
+        login_box.grid(row=1, column=0, sticky="nsew")
+
+        login_box.grid_rowconfigure((0, 1), weight=1)
+        login_box.grid_columnconfigure(0, weight=1)
+
+        self.entry = ctk.CTkEntry(
+            login_box,
+            fg_color="#ffffff",
+            text_color="#000000",
+            border_color="#cccccc",
+            font=("Arial", 32),
+            placeholder_text="host ip",
+            placeholder_text_color="#cccccc",
+            justify="center",
+        )
+        self.entry.bind('<Return>', lambda *_: self.on_connect())
+
+        self.entry.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
+
+        self.button = ctk.CTkButton(
+            login_box,
+            text="Enter",
+            fg_color="#333333",
+            text_color="#ffffff",
+            font=("Arial", 32, "bold"),
+            border_width=0,
+            command=self.on_connect
+        )
+        self.button.grid(row=1, column=0, sticky="nsew", padx=20, pady=20)
+
+        # connecting screen
+        self.connecting = ctk.CTkLabel(
+            self,
+            text="Connecting ...",
+            fg_color="transparent",
+            font=("Arial", 32)
+        )
+        self._animation_parameter = -1
+
+    def on_connect(self):
+        self._loop.create_task(self._on_connect())
+
+    async def _on_connect(self) -> None:
+        """
+        connect to server
+        """
+        # show loading screen
+        self.centerer.grid_forget()
+        self.connecting.grid(row=1, column=1, sticky="nsew")
+        self._animation_parameter = 0
+        self._update_animation()
+
+        # try to connect
+        if await self._client.connect(self.entry.get().strip()):
+            # if connection succeed, re-configure widgets to display
+            # nickname login
+            self.button.configure(command=self.on_login)
+            self.entry.unbind('<Return>')
+            self.entry.bind('<Return>', lambda *_: self.on_login())
+            self.entry.configure(placeholder_text="Nickname")
+            self.entry.delete(0, ctk.END)
+            self.centerer.focus_set()
+            self._animation_parameter = -1
+
+        else:
+            # some kind of error occurred when trying to connect
+            CTkMessagebox(
+                title="Connection Error!",
+                message=f"Failed to connect to \"{self.entry.get().strip()}\"",
+                icon="warning",
+            )
+
+        # switch to waiting screen
+        self.connecting.grid_forget()
+        self.centerer.grid(row=1, column=1, sticky="nsew")
+        self._animation_parameter = -1
+
+    def on_login(self) -> None:
+        # synced to async
+        self._loop.create_task(self._on_login())
+
+    async def _on_login(self) -> None:
+        """
+        try to log in to server
+        """
+        # show loading screen
+        self.centerer.grid_forget()
+        self.connecting.grid(row=1, column=1, sticky="nsew")
+
+        # try to connect
+        if await self._client.login(self.entry.get().strip()):
+            self.button.configure(command=self.on_login)
+            return self._callback()
+
+        self.connecting.grid_forget()
+        self.centerer.grid(row=1, column=1, sticky="nsew")
+
+    def _update_animation(self) -> None:
+        """
+        update the updating animation
+        """
+        if self._animation_parameter < 0:
+            return
+
+        # re-call own function
+        self.after(200, self._update_animation)
+
+        # animation states
+        if self._animation_parameter == 0:
+            self.connecting.configure(text="Connecting  ..")
+
+        elif self._animation_parameter == 1:
+            self.connecting.configure(text="Connecting . .")
+
+        elif self._animation_parameter == 2:
+            self.connecting.configure(text="Connecting .. ")
+
+        elif self._animation_parameter == 5:
+            self._animation_parameter = 0
+            return
+
+        else:
+            self.connecting.configure(text="Connecting ...")
+
+        self._animation_parameter += 1

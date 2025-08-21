@@ -1,0 +1,96 @@
+{
+  "text": [
+    {
+      "question": "Name one Python keyword used for loops",
+      "valid": ["while", "for"],
+      "match_case": false
+    },
+    {
+      "question": "Which Python keyword defines a function?",
+      "valid": ["def"],
+      "match_case": false
+    },
+    {
+      "question": "Which function can be used for printing in c?",
+      "valid": ["printf", "putc", "puts", "write", "send"],
+      "match_case": false
+    },
+    {
+      "question": "How does the c++ spaceship operator look?",
+      "valid": ["<=>"],
+      "match_case": true
+    }
+  ],
+  "choices": [
+    {
+      "question": "What is not a programming language?",
+      "choices": ["TrumpScript", "HTML", "Julia", "LOLCODE"],
+      "valid": [1]
+    },
+    {
+      "question": "Which keyword is correct in SQL?",
+      "choices": ["SELEKT", "WHICH", "ALTER", "EXECUTE"],
+      "valid": [2]
+    },
+    {
+      "question": "What is not a python type?",
+      "choices": ["char", "int", "float", "str"],
+      "valid": [0]
+    },
+    {
+      "question": "What Language is used for the PSoC?",
+      "choices": ["Java", "C", "C++", "Python"],
+      "valid": [1]
+    },
+    {
+      "question": "What is a a Raspberry pi?",
+      "choices": ["Micro-Controller", "LED", "Computer", "GPU"],
+      "valid": [2]
+    },
+    {
+      "question": "How do you shift a value in brainfuck?",
+      "choices": ["+++++[>>+<<-]", ">,[>,]<[<]>[.>]", "<.", "+++++++++"],
+      "valid": [0]
+    },
+    {
+      "question": "How many built-in keywords are in Python?",
+      "choices": ["5", "84", "19", "36"],
+      "valid": [3]
+    },
+    {
+      "question": "Which of those languages is compiled?",
+      "choices": ["C", "Python", "Java", "Rust"],
+      "valid": [0, 2, 3]
+    },
+    {
+      "question": "How do you define a function in C?",
+      "choices": [
+        "def main():",
+        "function main() {}",
+        "void main();",
+        "int main {}"
+      ],
+      "valid": [2]
+    },
+    {
+      "question": "What git command is used for uploading changes to GitHub?",
+      "choices": [
+        "git commit",
+        "git add",
+        "git remote",
+        "git push"
+      ],
+      "valid": [3]
+    }
+  ],
+  "yesno": [
+    {
+      "question": "Is Python an OOP?",
+      "valid": true
+    },
+    {
+      "question": "Is C an OOP?",
+      "valid": false
+    }
+  ]
+}

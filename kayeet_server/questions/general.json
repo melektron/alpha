@@ -1,0 +1,217 @@
+{
+  "text": [
+    {
+      "question": "What is the capital of France?",
+      "valid": ["Paris"],
+      "match_case": false
+    },
+    {
+      "question": "What is the largest planet in the Solar System?",
+      "valid": ["Jupiter"],
+      "match_case": false
+    },
+    {
+      "question": "What is the chemical Symbol for water?",
+      "valid": ["H2O"],
+      "match_case": true
+    },
+    {
+      "question": "What is the tallest mammal?",
+      "valid": ["Giraffe"],
+      "match_case": false
+    },
+    {
+      "question": "What is the chemical symbol for gold?",
+      "valid": ["Au"],
+      "match_case": true
+    },
+    {
+      "question": "Who painted the Mona Lisa?",
+      "valid": ["Leonardo da Vinci", "Da Vinci"],
+      "match_case": false
+    },
+    {
+      "question": "What is the currency of Japan?",
+      "valid": ["Yen"],
+      "match_case": false
+    },
+    {
+      "question": "What is the capital of Australia?",
+      "valid": ["Canberra"],
+      "match_case": false
+    },
+    {
+      "question": "How many continents are there?",
+      "valid": ["7"],
+      "match_case": true
+    },
+    {
+      "question": "What is the largest ocean on Earth?",
+      "valid": ["Pacific", "Pacific Ocean"],
+      "match_case": false
+    },
+    {
+      "question": "What is the tallest mountain in the world?",
+      "valid": ["Everest", "Mount Everest"],
+      "match_case": false
+    },
+    {
+      "question": "What is the chemical symbol for oxygen?",
+      "valid": ["O"],
+      "match_case": true
+    },
+    {
+      "question": "What is the largest organ in the human boxy?",
+      "valid": ["Skin"],
+      "match_case": false
+    },
+    {
+      "question": "What is the chemical symbol for carbon?",
+      "valid": ["C"],
+      "match_case": true
+    },
+    {
+      "question": "What is the hardest natural substance on Earth?",
+      "valid": ["Diamond"],
+      "match_case": false
+    },
+    {
+      "question": "What is the main ingredient in guacamole?",
+      "valid": ["Avocado"],
+      "match_case": false
+    },
+    {
+      "question": "What is the largest desert in the world?",
+      "valid": ["Antarctica"],
+      "match_case": false
+    },
+    {
+      "question": "What is the smallest prime number?",
+      "valid": ["2"],
+      "match_case": true
+    }
+  ],
+  "choices": [
+    {
+      "question": "Who wrote the play \"Hamlet\"?",
+      "choices": [
+        "Ronald D. Eisenhower",
+        "William Shakespeare",
+        "Amadeus Mozart",
+        "Winston Churchill"
+      ],
+      "valid": [1]
+    },
+    {
+      "question": "What is the capital city of Australia?",
+      "choices": ["Sydney", "Melbourne", "Canberra", "Brisbane"],
+      "valid": [2]
+    },
+    {
+      "question": "Who wrote the famous novel \"To Kill a Mockingbird\"?",
+      "choices": [
+        "Ernest Hemingway",
+        "Harper Lee",
+        "F. Scott Fitzgerald",
+        "J.D. Salinger"
+      ],
+      "valid": [1]
+    },
+    {
+      "question": "What is the chemical symbol for gold?",
+      "choices": ["Au", "Ag", "Fe", "Cu"],
+      "valid": [0]
+    },
+    {
+      "question": "Which planet is known as the \"Red Planet\"?",
+      "choices": ["Venus", "Mars", "Jupiter", "Saturn"],
+      "valid": [1]
+    },
+    {
+      "question": "What is the tallest mountain in the world?",
+      "choices": ["Mount Everest", "K2", "Mount Kilimanjaro", "Mount Fuji"],
+      "valid": [0]
+    },
+    {
+      "question": "Who painted the Mona Lisa?",
+      "choices": ["Michelangelo", "Leonardo da Vinci", "Vincent van Gogh", "Pablo Picasso"],
+      "valid": [1]
+    },
+    {
+      "question": "What is the chemical formula for water?",
+      "choices": ["H2O2", "CO2", "H2O", "O2"],
+      "valid": [2]
+    },
+    {
+      "question": "In which year did the Titanic sink?",
+      "choices": ["1910", "1912", "1914", "1916"],
+      "valid": [1]
+    },
+    {
+      "question": "Who is known as the father of modern physics?",
+      "choices": ["Albert Einstein", "Isaac Newton", "Galileo Galilei", "Nikola Tesla"],
+      "valid": [0]
+    },
+    {
+      "question": "What is the largest organ in the human body?",
+      "choices": ["Liver", "Brain", "Skin", "Heart"],
+      "valid": [2]
+    },
+    {
+      "question": "Which of the following is not a primary color?",
+      "choices": ["Red", "Blue", "Green", "Yellow"],
+      "valid": [3]
+    },
+    {
+      "question": "What is the currency of Japan?",
+      "choices": ["Yen", "Yuan", "Euro", "Dollar"],
+      "valid": [0]
+    },
+    {
+      "question": "Who wrote the play \"Romeo and Juliet\"?",
+      "choices": ["William Shakespeare", "Charles Dickens", "Jane Austen", "Mark Twain"],
+      "valid": [0]
+    },
+    {
+      "question": "What is the chemical symbol for sodium?",
+      "choices": ["So", "Na", "Sn", "Ni"],
+      "valid": [1]
+    },
+    {
+      "question": "What is the longest river in the world?",
+      "choices": ["Nile", "Amazon", "Yangtze", "Mississippi"],
+      "valid": [0]
+    },
+    {
+      "question": "What is the powerhouse of the cell?",
+      "choices": ["Nucleus", "Mitochondria", "Ribosome", "Golgi apparatus"],
+      "valid": [1]
+    },
+    {
+      "question": "Who discovered penicillin?",
+      "choices": ["Alexander Fleming", "Louis Pasteur", "Jonas Salk", "Edward Jenner"],
+      "valid": [0]
+    },
+    {
+      "question": "What is the chemical symbol for oxygen?",
+      "choices": ["O", "Ox", "Oc", "O2"],
+      "valid": [0]
+    },
+    {
+      "question": "Which planet is known for its beautiful rings?",
+      "choices": ["Jupiter", "Saturn", "Neptune", "Uranus"],
+      "valid": [1]
+    },
+    {
+      "question": "What is the world's largest ocean?",
+      "choices": ["Atlantic Ocean", "Indian Ocean", "Southern Ocean", "Pacific Ocean"],
+      "valid": [3]
+    }
+  ],
+  "yesno": [
+    {
+      "question": "Is Russia the biggest country in the world?",
+      "valid": true 
+    }
+  ]
+}

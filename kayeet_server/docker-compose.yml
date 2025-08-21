@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+  web:
+    image: kayeet-game-server
+    volumes:
+     - .:/usr/src/app
+    ports:
+      - "1647:1647"
+    networks:
+      - traefik_proxy_net
+#    labels:
+#     - traefik.enable=true
+#     - traefik.http.services.kayeet-gameserver.loadbalancer.server.port=1647
+#     - traefik.http.routers.kayeet-gameserver-router.entrypoints=websecure
+#     - traefik.http.routers.kayeet-gameserver-router.tls.certresolver=main-resolver
+#     - traefik.http.routers.kayeet-gameserver-router.rule=Host(`kayeet.my.domain.com`)
+
+networks:
+  traefik_proxy_net:  # connects to the traefik proxy that is part of the ERPNext docker-compose setup
+    external: true

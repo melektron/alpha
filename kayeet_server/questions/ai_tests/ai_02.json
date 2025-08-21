@@ -1,0 +1,103 @@
+{
+    "text": [
+        {
+            "question": "What is the largest mammal on Earth?",
+            "valid": [
+                "blue whale"
+            ],
+            "match_case": false
+        },
+        {
+            "question": "Name the process by which plants make their own food.",
+            "valid": [
+                "photosynthesis"
+            ],
+            "match_case": false
+        },
+        {
+            "question": "Which big cat is known for its distinctive black mane?",
+            "valid": [
+                "lion"
+            ]
+        },
+        {
+            "question": "What is the tallest tree species in the world?",
+            "valid": [
+                "coast redwood"
+            ],
+            "match_case": false
+        },
+        {
+            "question": "Which bird is known for its ability to mimic human speech?",
+            "valid": [
+                "parrot"
+            ]
+        },
+        {
+            "question": "What is the world's largest living structure made by organisms?",
+            "valid": [
+                "great barrier reef"
+            ]
+        },
+        {
+            "question": "Which animal is known as the fastest land animal?",
+            "valid": [
+                "cheetah"
+            ]
+        },
+        {
+            "question": "What is the process through which plants lose water vapor?",
+            "valid": [
+                "transpiration"
+            ]
+        },
+        {
+            "question": "Which plant is often associated with Halloween and vampires due to folklore?",
+            "valid": [
+                "garlic"
+            ]
+        },
+        {
+            "question": "What is the process of shedding feathers, fur, or skin to allow new growth?",
+            "valid": [
+                "molting"
+            ]
+        }
+    ],
+    "choices": [
+        {
+            "question": "Which of the following is a carnivorous plant?",
+            "choices": [
+                "Venus flytrap",
+                "Tulip",
+                "Cactus",
+                "Daisy"
+            ],
+            "valid": [
+                0
+            ]
+        },
+        {
+            "question": "Which of these animals is known for its ability to change color to blend with its surroundings?",
+            "choices": [
+                "Chameleon",
+                "Giraffe",
+                "Penguin",
+                "Kangaroo"
+            ],
+            "valid": [
+                0
+            ]
+        }
+    ],
+    "yesno": [
+        {
+            "question": "Do plants perform photosynthesis to produce their own food?",
+            "valid": true
+        },
+        {
+            "question": "Are all snakes venomous?",
+            "valid": false
+        }
+    ]
+}
