@@ -1,0 +1,31 @@
+[project]
+name = "simplytrain"
+version = "1.0.0"
+description = "Quick-n-dirty vocabulary translation training server with bare-bones webinterface."
+authors = [
+  { name="melektron", email="matteo@elektron.work" },
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "flask",
+]
+
+
+[project.scripts]
+simplytrain = "simplytrain.main:entry"
+
+
+[build-system]
+requires = ["setuptools >= 61.0.0", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+
+[tool.setuptools]
+package-data.simplytrain = [
+    "templates/*",
+    "static/**/*"
+]
